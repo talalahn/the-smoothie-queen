@@ -1,10 +1,51 @@
 // import { GetServerSidePropsContext } from 'next';
+import { css } from '@emotion/react';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { LoginResponseBody } from './api/login';
 import { Props } from './register';
+
+const registerLoginStyles = css`
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  z-index: 2;
+  background-color: pink;
+  max-width: 640px;
+  min-height: 250px;
+  align-content: center;
+  justify-content: center;
+  opacity: 0.8;
+  position: absolute;
+  margin: 5%;
+
+  > div > a {
+    color: black;
+    padding: 10px;
+    font-weight: bold;
+    border: 1px solid black;
+    border-radius: 10px;
+    width: 40px;
+    transition: all 0.2s linear 0s;
+    box-shadow: 4px 4px;
+    background-color: #efefef;
+    position: absolute;
+    z-index: 2;
+    text-decoration: none;
+
+    :hover {
+      box-shadow: 0 0.5em 0.5em -0.4em var(--hover);
+      transform: translateY(0.25em);
+      transition: 0.3s;
+    }
+  }
+  > div > button {
+    width: 70px;
+  }
+`;
 
 export default function Login(props: Props) {
   const [username, setUsername] = useState('');
@@ -48,7 +89,8 @@ export default function Login(props: Props) {
       // if you want to use userProfile with username redirect to /users/username
       // await router.push(`/users/${loginResponseBody.user.id}`);
       await props.refreshUserProfile();
-      await router.push(`/user/private-profile`);
+      await router.push(`/game`);
+      // console.log(getUserByUsername(username));
     }
   }
 
@@ -60,31 +102,37 @@ export default function Login(props: Props) {
       </Head>
 
       <main />
-      <h1>Login</h1>
+      <div css={registerLoginStyles}>
+        <div>
+          <Link href="/">Back</Link>
+        </div>
+        <div>
+          <label>
+            username:
+            <input
+              value={username}
+              onChange={(event) => {
+                setUsername(event.currentTarget.value);
+              }}
+            />
+          </label>
+          <label>
+            password:
+            <input
+              value={password}
+              onChange={(event) => {
+                setPassword(event.currentTarget.value);
+              }}
+            />
+          </label>
+          <button onClick={() => loginHandler()}>Login</button>
+          <br />
 
-      <label>
-        username:
-        <input
-          value={username}
-          onChange={(event) => {
-            setUsername(event.currentTarget.value);
-          }}
-        />
-      </label>
-      <label>
-        password:
-        <input
-          value={password}
-          onChange={(event) => {
-            setPassword(event.currentTarget.value);
-          }}
-        />
-      </label>
-      <button onClick={() => loginHandler()}>Login</button>
-      <br />
-      {errors.map((error) => (
-        <span key={`error-${error.message}`}>{error.message}</span>
-      ))}
+          {errors.map((error) => (
+            <span key={`error-${error.message}`}>{error.message}</span>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }
@@ -102,6 +150,7 @@ export function getServerSideProps(context: GetServerSidePropsContext) {
       },
     };
   }
+
   return {
     props: {},
   };
