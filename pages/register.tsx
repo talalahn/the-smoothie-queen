@@ -33,7 +33,7 @@ const registerLoginStyles = css`
     position: absolute;
     z-index: 2;
     text-decoration: none;
-
+    top: 10px;
     :hover {
       box-shadow: 0 0.5em 0.5em -0.4em var(--hover);
       transform: translateY(0.25em);
