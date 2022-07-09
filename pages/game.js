@@ -1,6 +1,6 @@
 import { css } from '@emotion/react';
 import Image from 'next/image.js';
-import React, { useEffect, useState } from 'react';
+import React, { useCallback, useEffect, useState } from 'react';
 import { formatTimer } from '../utils/formatTimer';
 
 const wrapperStyles = css`
@@ -71,11 +71,12 @@ const fliesStyles = (flies) => css`
 //   - create array of objects intervalDependantFunctions
 //       - function: makeDragQueenTrue()
 //       - interval: 5000
-const intervalDependentFunctions = [];
+let intervalDependentFunctions = [];
 
 // list state up of paused
 let paused;
 let displayTime;
+let roundedDisplayTime;
 
 // this function sets the time (frameTime) from the moment the page reloads
 function useFrameTime() {
@@ -85,10 +86,7 @@ function useFrameTime() {
     function frame(timestamp) {
       // TO DO:
       // - round down timestamp to nearest thousandth
-      const roundedDisplayTime = Math.floor(displayTime / 1000) * 1000;
-      if (!paused) {
-        console.log('RoundedTime', roundedDisplayTime);
-      }
+      roundedDisplayTime = Math.floor(displayTime / 1000) * 1000;
 
       for (let i = 0; i < intervalDependentFunctions.length; i++) {
         if (i === 0) {
@@ -98,16 +96,8 @@ function useFrameTime() {
           roundedDisplayTime !==
             intervalDependentFunctions[i].preceedingInterval
         ) {
-          // TODO:
-          // - call function that has function
-          // - variable = true
-          // - if variable true
-          // - do function
-          // - set the timeCalledNext
-          // - set the new function to a new singletonFunction
           intervalDependentFunctions[i].preceedingInterval = roundedDisplayTime;
           intervalDependentFunctions[i].function();
-          // console.log('WORKED');
         }
       }
 
@@ -136,7 +126,6 @@ function Timer() {
     setStartTime(performance.now() - pauseTime);
     setPauseTime(undefined);
   }
-  // console.log(displayTime);
   return (
     <>
       <div>{formatTimer(displayTime)}</div>
@@ -151,10 +140,6 @@ function Timer() {
 
 export default function GamePage() {
   const [score, setScore] = useState(0);
-  // TODO:
-  // add useState for timeCalledNext
-
-  // add random numbers instead of set values
   const [ingredientCounters, setIngredientCounters] = useState([
     {
       id: 'bananas',
@@ -191,66 +176,35 @@ export default function GamePage() {
       stock: 12,
     },
   ]);
+
   const [dragQueens, setDragQueens] = useState([
     {
       id: 1,
       state: false,
       position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
+      enterTime: 0,
+      patienceMeter: 0,
     },
     {
       id: 2,
       state: false,
       position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
+      enterTime: 0,
+      patienceMeter: 0,
     },
     {
       id: 3,
       state: false,
       position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
+      enterTime: 0,
+      patienceMeter: 0,
     },
     {
       id: 4,
       state: false,
       position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
-    },
-    {
-      id: 5,
-      state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
-    },
-    {
-      id: 6,
-      state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
-    },
-    {
-      id: 7,
-      state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
-    },
-    {
-      id: 8,
-      state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
-    },
-    {
-      id: 9,
-      state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
-    },
-    {
-      id: 10,
-      state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
-    },
-    {
-      id: 11,
-      state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
-    },
-    {
-      id: 12,
-      state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
+      enterTime: 0,
+      patienceMeter: 0,
     },
   ]);
   const [flies, setFlies] = useState(false);
@@ -264,76 +218,104 @@ export default function GamePage() {
     };
   });
 
-  // FUNCTIONS:
-  function makeDragQueenTrue() {
-    const falseDragQueens = dragQueens.filter((dragQueen) => {
-      return !dragQueen.state;
-    });
-    const randomQueen =
-      falseDragQueens[Math.floor(Math.random() * falseDragQueens.length)];
+  // FUNCTIONS
 
+  const makeDragQueenTrue = useCallback(() => {
     // use function as argument in useState (prevState)
-    setDragQueens((prevState) =>
-      prevState.map((dragQueen) => {
-        if (randomQueen.id === dragQueen.id) {
-          return {
-            ...dragQueen,
-            state: true,
-          };
+    setDragQueens((prevState) => {
+      // creating array of drag queens that are false
+      const falseDragQueens = prevState.filter((dragQueen) => {
+        return !dragQueen.state;
+      });
+      // choose random queen from array of false drag queens
+      const randomQueen =
+        falseDragQueens[Math.floor(Math.random() * falseDragQueens.length)];
+      return prevState.map((dragQueen) => {
+        // explanation: code that makes sure the game runs when all drag queens are in the game
+        if (falseDragQueens.length !== 0) {
+          if (randomQueen.id === dragQueen.id) {
+            return {
+              ...dragQueen,
+              state: true,
+              enterTime: roundedDisplayTime,
+            };
+          } else {
+            return {
+              ...dragQueen,
+            };
+          }
         } else {
-          return {
-            ...dragQueen,
-          };
+          return { ...dragQueen };
         }
-      }),
-    );
-  }
-  // setDragQueens(
-  //   dragQueens.map((dragQueen) => {
-  //     // check if the one i'm clicking is true
-  //     if (!dragQueen.state) {
-  //       return {
-  //         ...dragQueen,
-  //         state: true,
-  //       };
-  //     } else {
-  //       return { ...dragQueen };
-  //     }
-  //   }),
-  // );
+      });
+    });
+  }, []);
 
   function makeFliesTrue() {
     setFlies(true);
   }
 
-  function makeDragQueenAngrier() {}
+  const makeDragQueenAngrier = useCallback(() => {
+    // use function as argument in useState (prevState)
+    setDragQueens((prevState) => {
+      // creating array of drag queens that are true
+      const trueDragQueens = prevState.filter((dragQueen) => {
+        return dragQueen.enterTime > 0;
+      });
 
-  // - add function and interval to array intervalDependentFunction...in useEffect
+      const entranceTimes = trueDragQueens.map(
+        (trueDragQueen) => trueDragQueen.enterTime,
+      );
 
-  // TODO:
-  // add timeCalledNext which will be set to timeCalledNext+interval
+      return prevState.map((dragQueen) => {
+        // explanation: code that makes sure the game runs when all drag queens are in the game
+        if (trueDragQueens.length !== 0) {
+          console.log('entranceTimes', entranceTimes);
+          console.log('dragQueens', trueDragQueens);
+
+          for (let i = 0; i < entranceTimes.length; i++) {
+            if (entranceTimes[i] === dragQueen.enterTime) {
+              console.log('i', entranceTimes[i]);
+              console.log('dq', dragQueen.enterTime);
+              if (roundedDisplayTime >= dragQueen.enterTime + 6000) {
+                return {
+                  ...dragQueen,
+                  enterTime: roundedDisplayTime,
+                  patienceMeter: dragQueen.patienceMeter + 1,
+                };
+              } else {
+                return {
+                  ...dragQueen,
+                };
+              }
+            } else {
+              return { ...dragQueen };
+            }
+          }
+        }
+      });
+    });
+  }, []);
+
   useEffect(() => {
-    // add function and interval value to intervalDependentFunction
-    intervalDependentFunctions.push(
+    intervalDependentFunctions = [
       {
         function: makeDragQueenTrue,
         interval: 5000,
         preceedingInterval: 0,
       },
-      { function: makeFliesTrue, interval: 8000 },
-      { function: makeDragQueenAngrier, interval: 6000 },
-    );
+      { function: makeFliesTrue, interval: 8000, preceedingInterval: 0 },
+      { function: makeDragQueenAngrier, interval: 6000, preceedingInterval: 0 },
+    ];
   }, []);
-
-  // TO DO:
-  // - create useEffect with dependency [score]
-  // - change intervalDependentFunction.interval to new value
 
   useEffect(() => {
     if (score >= 50) {
-      // intervalDependentFunction.interval === new interval value
+      intervalDependentFunctions[0].interval = 4000;
+      intervalDependentFunctions[1].interval = 7000;
     } else if (score >= 100) {
-      // intervalDependentFunction.interval === new interval value
+      intervalDependentFunctions[0].interval = 3000;
+      intervalDependentFunctions[1].interval = 6000;
     } else {
       // intervalDependentFunction.interval === new interval value
     }
@@ -346,52 +328,61 @@ export default function GamePage() {
           <div>Score: {score}</div>
           <Image src="/background.png" width="640" height="380" />
         </div>
+
         {/* the drag queens */}
         {dragQueens.map((dragQueen) => (
-          <button
-            // key={`dragQueen-${dragQueens.id}`}
-            css={dragQueenStyles(dragQueen)}
-            onMouseDown={() => {
-              if (
-                ingredientCounters.every(
-                  (ingredient) => ingredient.amount === 0,
-                )
-              ) {
-                setDragQueens(
-                  dragQueens.map((clickedDragQueen) => {
-                    // check if this is the one i'm clicking
-                    if (dragQueen.id === clickedDragQueen.id) {
-                      // check if the one i'm clicking is true
-                      if (dragQueen.state) {
-                        return {
-                          ...clickedDragQueen,
-                          state: false,
-                          position: Math.floor(
-                            Math.random() * (600 - 200 + 1) + 200,
-                          ),
-                        };
+          <div>
+            <div>
+              DragQueen: {dragQueen.id} Anger: {dragQueen.patienceMeter} Time to
+              get angrier: {dragQueen.enterTime + 6000}
+            </div>
+            <button
+              // key={`dragQueen-${dragQueens.id}`}
+              css={dragQueenStyles(dragQueen)}
+              onMouseDown={() => {
+                if (
+                  ingredientCounters.every(
+                    (ingredient) => ingredient.amount === 0,
+                  )
+                ) {
+                  setDragQueens(
+                    dragQueens.map((clickedDragQueen) => {
+                      // check if this is the one i'm clicking
+                      if (dragQueen.id === clickedDragQueen.id) {
+                        // check if the one i'm clicking is true
+                        if (dragQueen.state) {
+                          return {
+                            ...clickedDragQueen,
+                            state: false,
+                            position: Math.floor(
+                              Math.random() * (600 - 200 + 1) + 200,
+                            ),
+                            enterTime: 0,
+                            patienceMeter: 0,
+                          };
+                        } else {
+                          return { ...clickedDragQueen };
+                        }
                       } else {
                         return { ...clickedDragQueen };
                       }
-                    } else {
-                      return { ...clickedDragQueen };
-                    }
-                  }),
-                );
-                setIngredientCounters(
-                  ingredientCounters.map((ingredient) => {
-                    return {
-                      ...ingredient,
-                      amount: Math.floor(Math.random() * 4 + 1),
-                    };
-                  }),
-                );
-                setScore(score + 10);
-              }
-            }}
-          >
-            {dragQueen.id}
-          </button>
+                    }),
+                  );
+                  setIngredientCounters(
+                    ingredientCounters.map((ingredient) => {
+                      return {
+                        ...ingredient,
+                        amount: Math.floor(Math.random() * 4 + 1),
+                      };
+                    }),
+                  );
+                  setScore(score + 10);
+                }
+              }}
+            >
+              {dragQueen.id}
+            </button>
+          </div>
         ))}
 
         <div>
@@ -477,68 +468,7 @@ export default function GamePage() {
         </div>
 
         <br />
-        {/* the buttons to set the drag queens back to true */}
-        {dragQueens.map((dragQueen) => (
-          <button
-            // key={`dragQueenButton-${dragQueens.id}`}
-            onClick={() => {
-              // if (displayTime % 7 === 0) {
-              setDragQueens(
-                dragQueens.map((clickedDragQueen) => {
-                  // check if this is the one i'm clicking
-                  if (dragQueen.id === clickedDragQueen.id) {
-                    // check if the one i'm clicking is true
-                    if (!dragQueen.state) {
-                      return {
-                        ...clickedDragQueen,
-                        state: true,
-                      };
-                    } else {
-                      return { ...clickedDragQueen };
-                    }
-                  } else {
-                    return { ...clickedDragQueen };
-                  }
-                }),
-              );
-              // }
-            }}
-          >
-            Set Drag Queen {dragQueen.id} To True
-            <br />
-            state: {dragQueen.state.toString()}
-          </button>
-        ))}
 
-        {/*  button that will set a random queen to true */}
-        <button
-          onClick={() => {
-            const falseDragQueens = dragQueens.filter((dragQueen) => {
-              return !dragQueen.state;
-            });
-            const randomQueen =
-              falseDragQueens[
-                Math.floor(Math.random() * falseDragQueens.length)
-              ];
-
-            setDragQueens(
-              dragQueens.map((dragQueen) => {
-                if (randomQueen.id === dragQueen.id) {
-                  return {
-                    ...dragQueen,
-                    state: true,
-                  };
-                } else {
-                  return {
-                    ...dragQueen,
-                  };
-                }
-              }),
-            );
-          }}
-        >
-          random drag queen to true
-        </button>
         <button
           onClick={() => {
             console.log(dragQueens);
