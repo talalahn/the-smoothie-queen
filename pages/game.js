@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
 import Image from 'next/image.js';
+import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import { formatTimer } from '../utils/formatTimer';
 
@@ -33,6 +34,21 @@ const pauseMenuStyles = (paused) => css`
   z-index: ${paused ? '1000' : '-10'};
 `;
 
+const gameOverMenuStyles = (gameOver) => css`
+  width: 620px;
+  height: 360px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  background-color: black;
+  opacity: 90%;
+  color: white;
+  text-align: center;
+  text-justify: center;
+  z-index: ${gameOver ? '10000' : '-10'};
+`;
+
 const dragQueenStyles = (dragQueen) => css`
   background-color: ${dragQueen.state ? 'pink' : 'white'};
   border: 1px solid black;
@@ -64,40 +80,45 @@ const fliesStyles = (flies) => css`
   border: 1px solid black;
   padding: 10px;
   position: absolute;
-  left: ${flies ? '200px' : '20px'};
+  left: ${flies.state ? '200px' : '20px'};
 `;
+// TODOS:
+// - save score into database
+// - take score from database and display on menu
+// - display score in game over screen
 
-// TO DO: DONE
-//   - create array of objects intervalDependantFunctions
-//       - function: makeDragQueenTrue()
-//       - interval: 5000
-let intervalDependentFunctions = [];
+// - figure out how to make sprite work with patienceMeter
 
 // list state up of paused
 let paused;
 let displayTime;
 let roundedDisplayTime;
+let gameOver = false;
+let intervalDependentFunctions = [];
 
 // this function sets the time (frameTime) from the moment the page reloads
 function useFrameTime() {
   const [frameTime, setFrameTime] = useState();
+
   useEffect(() => {
     let frameId;
-    function frame(timestamp) {
-      // TO DO:
-      // - round down timestamp to nearest thousandth
-      roundedDisplayTime = Math.floor(displayTime / 1000) * 1000;
 
-      for (let i = 0; i < intervalDependentFunctions.length; i++) {
-        if (i === 0) {
-        }
-        if (
-          roundedDisplayTime % intervalDependentFunctions[i].interval === 0 &&
-          roundedDisplayTime !==
-            intervalDependentFunctions[i].preceedingInterval
-        ) {
-          intervalDependentFunctions[i].preceedingInterval = roundedDisplayTime;
-          intervalDependentFunctions[i].function();
+    function frame(timestamp) {
+      // round down timestamp to nearest thousandth
+      roundedDisplayTime = Math.floor(displayTime / 1000) * 1000;
+      if (!gameOver) {
+        for (let i = 0; i < intervalDependentFunctions.length; i++) {
+          if (i === 0) {
+          }
+          if (
+            roundedDisplayTime % intervalDependentFunctions[i].interval === 0 &&
+            roundedDisplayTime !==
+              intervalDependentFunctions[i].preceedingInterval
+          ) {
+            intervalDependentFunctions[i].preceedingInterval =
+              roundedDisplayTime;
+            intervalDependentFunctions[i].function();
+          }
         }
       }
 
@@ -114,6 +135,12 @@ function useFrameTime() {
 function Timer() {
   const [startTime, setStartTime] = useState(0);
   const [pauseTime, setPauseTime] = useState(0);
+  const router = useRouter();
+  function handleRestart() {
+    router.reload(window.location.pathname);
+    // page.reload
+  }
+
   paused = pauseTime !== undefined;
   const frameTime = useFrameTime();
   displayTime = paused ? pauseTime : frameTime - startTime;
@@ -126,16 +153,28 @@ function Timer() {
     setStartTime(performance.now() - pauseTime);
     setPauseTime(undefined);
   }
-  return (
-    <>
-      <div>{formatTimer(displayTime)}</div>
-      <button onClick={paused ? play : pause}>
-        {' '}
-        {paused ? 'Play' : ' Pause'}
-      </button>
-      <div css={pauseMenuStyles(paused)}>PAUSE MENU</div>
-    </>
-  );
+
+  if (!gameOver) {
+    return (
+      <>
+        <div>{formatTimer(displayTime)}</div>
+        <button onClick={paused ? play : pause}>
+          {' '}
+          {paused ? 'Play' : ' Pause'}
+        </button>
+        <div css={pauseMenuStyles(paused)}>PAUSE MENU</div>
+      </>
+    );
+  } else {
+    return (
+      <div css={gameOverMenuStyles(gameOver)}>
+        <div>GAME OVER</div>
+        {/* get score from database */}
+        <div>SCORE: </div>
+        <button onClick={handleRestart}>PLAY AGAIN?</button>
+      </div>
+    );
+  }
 }
 
 export default function GamePage() {
@@ -144,18 +183,22 @@ export default function GamePage() {
     {
       id: 'bananas',
       amount: 2,
+      spoiled: false,
     },
     {
       id: 'strawberries',
       amount: 3,
+      spoiled: false,
     },
     {
       id: 'ice',
       amount: 1,
+      spoiled: false,
     },
     {
       id: 'peanutButter',
       amount: 3,
+      spoiled: false,
     },
   ]);
   const [containerCounters, setContainerCounters] = useState([
@@ -176,7 +219,6 @@ export default function GamePage() {
       stock: 12,
     },
   ]);
-
   const [dragQueens, setDragQueens] = useState([
     {
       id: 1,
@@ -207,8 +249,16 @@ export default function GamePage() {
       patienceMeter: 0,
     },
   ]);
-  const [flies, setFlies] = useState(false);
+  const [flies, setFlies] = useState({
+    state: false,
+    enterTime: 0,
+    ingredientPosition: 0,
+    // create array of points on the game that the ingredients will be in and then randomly choose one of these for the flies to position to
+    // if no time, just make them hover over the food
+    // position: 0,
 
+    // onn set flies to false, generate new ingredientPosition
+  });
   const ingredientInfo = containerCounters.map((container) => {
     return {
       ...container,
@@ -252,62 +302,106 @@ export default function GamePage() {
   }, []);
 
   function makeFliesTrue() {
-    setFlies(true);
+    setFlies((prevState) => {
+      if (!prevState.state) {
+        return {
+          state: true,
+          enterTime: roundedDisplayTime,
+          ingredientPosition: Math.floor(
+            Math.random() * ingredientCounters.length,
+          ),
+        };
+      } else {
+        return {
+          ...prevState,
+        };
+      }
+    });
   }
 
+  function endGame() {
+    console.log('GAME OVER');
+    gameOver = true;
+  }
+
+  const spoilFood = useCallback(() => {
+    if (flies.state) {
+      setIngredientCounters((prevState) => {
+        return prevState.map((ingredient) => {
+          if (roundedDisplayTime >= flies.enterTime + 6000) {
+            if (prevState.indexOf(ingredient) === flies.ingredientPosition) {
+              console.log('foodSpoils');
+              return { ...ingredient, spoiled: true };
+            } else {
+              return { ...ingredient };
+            }
+          } else {
+            return { ...ingredient };
+          }
+        });
+      });
+    }
+  }, [flies]);
+
   const makeDragQueenAngrier = useCallback(() => {
+    console.log(roundedDisplayTime);
     // use function as argument in useState (prevState)
     setDragQueens((prevState) => {
-      // creating array of drag queens that are true
-      const trueDragQueens = prevState.filter((dragQueen) => {
-        return dragQueen.enterTime > 0;
-      });
-
-      const entranceTimes = trueDragQueens.map(
-        (trueDragQueen) => trueDragQueen.enterTime,
-      );
-
       return prevState.map((dragQueen) => {
-        // explanation: code that makes sure the game runs when all drag queens are in the game
-        if (trueDragQueens.length !== 0) {
-          console.log('entranceTimes', entranceTimes);
-          console.log('dragQueens', trueDragQueens);
-
-          for (let i = 0; i < entranceTimes.length; i++) {
-            if (entranceTimes[i] === dragQueen.enterTime) {
-              console.log('i', entranceTimes[i]);
-              console.log('dq', dragQueen.enterTime);
-              if (roundedDisplayTime >= dragQueen.enterTime + 6000) {
-                return {
-                  ...dragQueen,
-                  enterTime: roundedDisplayTime,
-                  patienceMeter: dragQueen.patienceMeter + 1,
-                };
-              } else {
-                return {
-                  ...dragQueen,
-                };
-              }
-            } else {
-              return { ...dragQueen };
-            }
-          }
+        if (
+          dragQueen.state &&
+          roundedDisplayTime >= dragQueen.enterTime + 6000
+        ) {
+          console.log(`this drag is getting angry ${dragQueen.id} `);
+          return {
+            ...dragQueen,
+            enterTime: roundedDisplayTime,
+            patienceMeter: dragQueen.patienceMeter + 1,
+          };
+        } else {
+          return dragQueen;
         }
       });
     });
-  }, []);
+  });
+
+  useEffect(() => {
+    for (let i = 0; i < dragQueens.length; i++) {
+      if (dragQueens[i].patienceMeter === 3) {
+        endGame();
+      }
+    }
+  }, [dragQueens]);
 
   useEffect(() => {
     intervalDependentFunctions = [
       {
+        id: 1,
         function: makeDragQueenTrue,
         interval: 5000,
         preceedingInterval: 0,
       },
-      { function: makeFliesTrue, interval: 8000, preceedingInterval: 0 },
-      { function: makeDragQueenAngrier, interval: 6000, preceedingInterval: 0 },
+      { id: 2, function: makeFliesTrue, interval: 8000, preceedingInterval: 0 },
+      {
+        id: 3,
+        function: makeDragQueenAngrier,
+        interval: 1000,
+        preceedingInterval: 0,
+      },
+      { id: 4, function: spoilFood, interval: 1000, preceedingInterval: 0 },
     ];
   }, []);
+
+  useEffect(() => {
+    intervalDependentFunctions = intervalDependentFunctions.map((dependant) => {
+      if (dependant.id === 4) {
+        return { ...dependant, function: spoilFood };
+      } else {
+        return dependant;
+      }
+    });
+    // add flies to dependencies so that every time flies (state) updates => the spoilFood() function resets and has the current state of the flies
+  }, [flies]);
 
   useEffect(() => {
     if (score >= 50) {
@@ -386,7 +480,8 @@ export default function GamePage() {
         ))}
 
         <div>
-          {/* the ingredients */}
+          {/* the ingredients
+  //      - onClick -> if ingredient.spoiled === true, set ingredient.amount: 0*/}
           {ingredientInfo.map((ingredient) => (
             <button
               // key={`ingredient-${ingredientInfo.id}`}
@@ -395,8 +490,36 @@ export default function GamePage() {
                   ingredientCounters.map((oldIngredient) => {
                     // check if this is the one i'm clicking
                     if (ingredient.id === oldIngredient.id) {
+                      if (oldIngredient.spoiled && !flies.state) {
+                        console.log('food gets thrown away');
+                        // setContainerCounters(
+                        //   containerCounters.map((container) => {
+                        //     if (ingredient.id === container.id) {
+                        //       if (ingredient.spoiled) {
+                        //         return {
+                        //           ...container,
+                        //           stock: 0,
+                        //         };
+                        //       } else {
+                        //         return {
+                        //           ...container,
+                        //         };
+                        //       }
+                        //     } else {
+                        //       return {
+                        //         ...container,
+                        //       };
+                        //     }
+                        //   }),
+                        // );
+                        return {
+                          ...ingredient,
+                          spoiled: false,
+                        };
+                      }
+
                       // check if the one i'm clicking has an amount of 0
-                      if (ingredient.amount > 0 && ingredient.stock > 0) {
+                      else if (ingredient.amount > 0 && ingredient.stock > 0) {
                         return {
                           ...oldIngredient,
                           amount: oldIngredient.amount - 1,
@@ -411,8 +534,13 @@ export default function GamePage() {
                         ingredient.amount === 0 &&
                         ingredient.stock > 0
                       ) {
-                        setScore(score - 5);
-                        return { ...oldIngredient };
+                        if (score !== 0) {
+                          setScore(score - 5);
+                          return { ...oldIngredient };
+                        } else {
+                          setScore(0);
+                          return { ...oldIngredient };
+                        }
                       } else {
                         return {
                           ...oldIngredient,
@@ -472,6 +600,9 @@ export default function GamePage() {
         <button
           onClick={() => {
             console.log(dragQueens);
+            // dragQueens[1].patienceMeter = 3;
+            console.log(flies);
+            console.log(ingredientCounters);
           }}
         >
           console.log
@@ -519,14 +650,26 @@ export default function GamePage() {
         ))}
         <button
           onClick={() => {
-            setFlies(true);
+            if (!flies.state) {
+              setFlies({
+                state: true,
+                enterTime: roundedDisplayTime,
+                ingredientPosition: Math.floor(
+                  Math.random() * ingredientCounters.length,
+                ),
+              });
+            }
           }}
         >
           Set flies to true
         </button>
         <button
           onClick={() => {
-            setFlies(false);
+            setFlies({
+              state: false,
+              enterTime: 0,
+              ingredientPosition: 0,
+            });
           }}
         >
           Set flies to false
