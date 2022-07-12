@@ -86,8 +86,18 @@ const fliesStyles = (flies) => css`
 // - save score into database
 // - take score from database and display on menu
 // - display score in game over screen
-
 // - figure out how to make sprite work with patienceMeter
+// - create array of coordinates for each ingredientPosition
+// - create start menu
+//        - start button
+//        - not logged in? message: your score will not be saved
+//        - button: rules -> rules show up
+// - create game over Menu
+//        - input field (varchar3) enter name
+//        - save score into database
+//        - take score from database and display on gameover menu
+//        - sort scores on database
+//        - take top 10 scores from database and display on gameoverMenu
 
 // list state up of paused
 let paused;
@@ -137,8 +147,8 @@ function Timer() {
   const [pauseTime, setPauseTime] = useState(0);
   const router = useRouter();
   function handleRestart() {
-    router.reload(window.location.pathname);
     // page.reload
+    router.reload(window.location.pathname);
   }
 
   paused = pauseTime !== undefined;
@@ -254,10 +264,6 @@ export default function GamePage() {
     enterTime: 0,
     ingredientPosition: 0,
     // create array of points on the game that the ingredients will be in and then randomly choose one of these for the flies to position to
-    // if no time, just make them hover over the food
-    // position: 0,
-
-    // onn set flies to false, generate new ingredientPosition
   });
   const ingredientInfo = containerCounters.map((container) => {
     return {
@@ -265,6 +271,9 @@ export default function GamePage() {
       amount: ingredientCounters.find(
         (ingredient) => ingredient.id === container.id,
       ).amount,
+      spoiled: ingredientCounters.find(
+        (ingredient) => ingredient.id === container.id,
+      ).spoiled,
     };
   });
 
@@ -425,13 +434,15 @@ export default function GamePage() {
 
         {/* the drag queens */}
         {dragQueens.map((dragQueen) => (
-          <div>
+          <div
+            // move this to button later
+            key={`dragQueen-${dragQueen.id}`}
+          >
             <div>
               DragQueen: {dragQueen.id} Anger: {dragQueen.patienceMeter} Time to
-              get angrier: {dragQueen.enterTime + 6000}
+              get angrier: {(dragQueen.enterTime + 6000) / 1000}
             </div>
             <button
-              // key={`dragQueen-${dragQueens.id}`}
               css={dragQueenStyles(dragQueen)}
               onMouseDown={() => {
                 if (
@@ -480,50 +491,27 @@ export default function GamePage() {
         ))}
 
         <div>
-          {/* the ingredients
-  //      - onClick -> if ingredient.spoiled === true, set ingredient.amount: 0*/}
+          {/* the ingredients */}
           {ingredientInfo.map((ingredient) => (
             <button
-              // key={`ingredient-${ingredientInfo.id}`}
+              key={`ingredient-${ingredient.id}`}
               onClick={() => {
                 setIngredientCounters(
                   ingredientCounters.map((oldIngredient) => {
                     // check if this is the one i'm clicking
                     if (ingredient.id === oldIngredient.id) {
                       if (oldIngredient.spoiled && !flies.state) {
-                        console.log('food gets thrown away');
-                        // setContainerCounters(
-                        //   containerCounters.map((container) => {
-                        //     if (ingredient.id === container.id) {
-                        //       if (ingredient.spoiled) {
-                        //         return {
-                        //           ...container,
-                        //           stock: 0,
-                        //         };
-                        //       } else {
-                        //         return {
-                        //           ...container,
-                        //         };
-                        //       }
-                        //     } else {
-                        //       return {
-                        //         ...container,
-                        //       };
-                        //     }
-                        //   }),
-                        // );
+                        console.log('food no longer spoiled');
                         return {
                           ...ingredient,
                           spoiled: false,
                         };
                       }
-
                       // check if the one i'm clicking has an amount of 0
                       else if (ingredient.amount > 0 && ingredient.stock > 0) {
                         return {
                           ...oldIngredient,
                           amount: oldIngredient.amount - 1,
-                          // stock: oldIngredient.stock - 1,
                         };
                       } else if (
                         ingredient.amount > 0 &&
@@ -534,6 +522,7 @@ export default function GamePage() {
                         ingredient.amount === 0 &&
                         ingredient.stock > 0
                       ) {
+                        // reduce score by 5
                         if (score !== 0) {
                           setScore(score - 5);
                           return { ...oldIngredient };
@@ -544,7 +533,6 @@ export default function GamePage() {
                       } else {
                         return {
                           ...oldIngredient,
-                          // stock: oldIngredient.stock - 1,
                         };
                       }
                     } else {
@@ -556,22 +544,21 @@ export default function GamePage() {
                   containerCounters.map((container) => {
                     // check if this is the one i'm clicking
                     if (ingredient.id === container.id) {
+                      if (ingredient.spoiled && !flies.state) {
+                        console.log('food thrown away');
+                        return {
+                          ...container,
+                          stock: 0,
+                        };
+                      }
                       // check if the one i'm clicking has an amount of 0
-                      if (ingredient.amount > 0 && container.stock > 0) {
+                      else if (container.stock > 0) {
                         return {
                           ...container,
                           stock: container.stock - 1,
                         };
-                      } else if (
-                        // ingredient.amount > 0 &&
-                        container.stock === 0
-                      ) {
-                        return { ...container };
                       } else {
-                        return {
-                          ...container,
-                          stock: container.stock - 1,
-                        };
+                        return { ...container };
                       }
                     } else {
                       return { ...container };
@@ -587,6 +574,9 @@ export default function GamePage() {
                       <span>{singleIngredientInfo.id}</span>
                       <br />
                       <span>amount: {singleIngredientInfo.amount}</span>
+                      <br />
+                      {/* for some reason this isn't showing */}
+                      <span>spoiled: {singleIngredientInfo.spoiled}</span>
                     </>
                   );
                 }
@@ -603,6 +593,7 @@ export default function GamePage() {
             // dragQueens[1].patienceMeter = 3;
             console.log(flies);
             console.log(ingredientCounters);
+            console.log(ingredientInfo);
           }}
         >
           console.log
@@ -612,14 +603,14 @@ export default function GamePage() {
         {/* THE BACKUP INGREDIENTS */}
         {ingredientInfo.map((ingredient) => (
           <button
-            // key={`backupIngredient-${ingredient.id}`}
+            key={`backupIngredient-${ingredient.id}`}
             onClick={() => {
               setContainerCounters(
                 containerCounters.map((container) => {
                   // check if this is the one i'm clicking
                   if (ingredient.id === container.id) {
                     // check if the stock is below 9
-                    if (ingredient.stock <= 9) {
+                    if (container.stock <= 9) {
                       return {
                         ...container,
                         stock: container.stock + 3,
