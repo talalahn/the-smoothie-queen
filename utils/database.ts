@@ -187,3 +187,47 @@ export async function deleteExpiredSession() {
 
   return sessions.map((session) => camelcaseKeys(session));
 }
+
+type Score = {
+  alias: string;
+  score: number;
+  userId: number;
+};
+export async function saveScore(alias: string, score: number, userId: number) {
+  console.log('saveScore check', alias, score, userId);
+  if (!alias) return;
+  const [scores] = await sql<[Score]>`
+  INSERT INTO scores
+      ( alias, score, user_id)
+  VALUES
+      (${alias}, ${score}, ${userId} )
+  RETURNING
+      alias,
+      score
+      `;
+  return scores;
+}
+
+export async function getAllScores() {
+  const [scores] = await sql<[Score]>`
+  SELECT
+      alias, score
+  FROM
+      scores
+`;
+  return scores;
+}
+
+export async function getPersonalScores(userId: number) {
+  console.log('saveScore check', userId);
+  const [scores] = await sql<[Score]>`
+  SELECT
+      alias, score
+  FROM
+      scores
+  WHERE
+      user_id = ${userId}
+
+`;
+  return scores;
+}

@@ -2,6 +2,8 @@ import { css } from '@emotion/react';
 import Image from 'next/image.js';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
+import { getAllScores, getUserByValidSessionToken } from '../utils/database';
+// import { saveScore } from '../utils/database';
 import { formatTimer } from '../utils/formatTimer';
 
 const wrapperStyles = css`
@@ -48,6 +50,20 @@ const gameOverMenuStyles = (gameOver) => css`
   text-justify: center;
   z-index: ${gameOver ? '10000' : '-10'};
 `;
+const highscoreMenuStyles = (scoreState) => css`
+  width: 620px;
+  height: 360px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  background-color: black;
+  opacity: 90%;
+  color: white;
+  text-align: center;
+  text-justify: center;
+  z-index: ${scoreState ? '100000' : '-10'};
+`;
 
 const dragQueenStyles = (dragQueen) => css`
   background-color: ${dragQueen.state ? 'pink' : 'white'};
@@ -75,6 +91,9 @@ const containerIngredientsStyles = css`
     margin-right: 10px;
   }
 `;
+const ingredientButtonStyles = (ingredient) => css`
+  background-color: ${ingredient.spoiled ? 'green' : 'none'};
+`;
 
 const fliesStyles = (flies) => css`
   border: 1px solid black;
@@ -83,21 +102,18 @@ const fliesStyles = (flies) => css`
   left: ${flies.state ? '200px' : '20px'};
 `;
 // TODOS:
-// - save score into database
-// - take score from database and display on menu
-// - display score in game over screen
+
 // - figure out how to make sprite work with patienceMeter
 // - create array of coordinates for each ingredientPosition
 // - create start menu
 //        - start button
 //        - not logged in? message: your score will not be saved
 //        - button: rules -> rules show up
-// - create game over Menu
-//        - input field (varchar3) enter name
 //        - save score into database
 //        - take score from database and display on gameover menu
 //        - sort scores on database
 //        - take top 10 scores from database and display on gameoverMenu
+// - create a readme file
 
 // list state up of paused
 let paused;
@@ -105,6 +121,7 @@ let displayTime;
 let roundedDisplayTime;
 let gameOver = false;
 let intervalDependentFunctions = [];
+let scoreState = false;
 
 // this function sets the time (frameTime) from the moment the page reloads
 function useFrameTime() {
@@ -142,14 +159,62 @@ function useFrameTime() {
 }
 
 // this function allows to pause and play the time (displayTime)
-function Timer() {
+function Timer(score, username, userId) {
   const [startTime, setStartTime] = useState(0);
   const [pauseTime, setPauseTime] = useState(0);
+  const [alias, setAlias] = useState();
+  const [errors, setErrors] = useState([]);
   const router = useRouter();
   function handleRestart() {
     // page.reload
     router.reload(window.location.pathname);
   }
+  console.log(username, userId);
+
+  async function handleSaveScore() {
+    scoreState = true;
+    if (userId) {
+      const saveScoreResponse = await fetch('/api/scores', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          alias: alias,
+          score: score,
+          userId: userId,
+        }),
+      });
+
+      const saveScoreResponseBody = await saveScoreResponse.json();
+      console.log(saveScoreResponseBody);
+
+      if ('errors' in saveScoreResponseBody) {
+        setErrors(saveScoreResponseBody.errors);
+        return;
+      }
+    }
+    //
+    // add score to scores table
+  }
+  async function handleShowScores() {
+    const saveScoreResponse = await fetch('/api/scores', {
+      method: 'GET',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+    });
+
+    const saveScoreResponseBody = await saveScoreResponse.json();
+    console.log(saveScoreResponseBody);
+
+    if ('errors' in saveScoreResponseBody) {
+      setErrors(saveScoreResponseBody.errors);
+      return;
+    }
+  }
+  //
+  // add score to scores table
 
   paused = pauseTime !== undefined;
   const frameTime = useFrameTime();
@@ -165,6 +230,7 @@ function Timer() {
   }
 
   if (!gameOver) {
+    handleShowScores();
     return (
       <>
         <div>{formatTimer(displayTime)}</div>
@@ -175,19 +241,54 @@ function Timer() {
         <div css={pauseMenuStyles(paused)}>PAUSE MENU</div>
       </>
     );
-  } else {
+  } else if (gameOver && !scoreState && userId) {
     return (
       <div css={gameOverMenuStyles(gameOver)}>
         <div>GAME OVER</div>
+        <div>SCORE: {score} </div>
+
+        <label>
+          ENTER NAME:
+          <input
+            value={alias}
+            type="text"
+            maxLength="3"
+            onChange={(event) => {
+              setAlias(event.currentTarget.value);
+            }}
+          />
+        </label>
+
+        <button onClick={() => handleSaveScore()}>SAVE SCORE</button>
+        {errors.map((error) => (
+          <span key={`error${error.message}`}>{error.message}</span>
+        ))}
+      </div>
+    );
+  } else if (gameOver && !scoreState && !userId) {
+    return (
+      <div css={gameOverMenuStyles(gameOver)}>
+        <div>GAME OVER</div>
+        <div>SCORE: {score} </div>
+        <div>HIGH SCORES</div>
+        {/* <div>{getAllScores()}</div> */}
+
+        <button onClick={handleRestart}>PLAY AGAIN?</button>
+      </div>
+    );
+  } else {
+    return (
+      <div css={highscoreMenuStyles(scoreState)}>
+        <div>HIGH SCORES</div>
         {/* get score from database */}
-        <div>SCORE: </div>
+
         <button onClick={handleRestart}>PLAY AGAIN?</button>
       </div>
     );
   }
 }
 
-export default function GamePage() {
+export default function GamePage(props) {
   const [score, setScore] = useState(0);
   const [ingredientCounters, setIngredientCounters] = useState([
     {
@@ -495,6 +596,7 @@ export default function GamePage() {
           {ingredientInfo.map((ingredient) => (
             <button
               key={`ingredient-${ingredient.id}`}
+              css={ingredientButtonStyles(ingredient)}
               onClick={() => {
                 setIngredientCounters(
                   ingredientCounters.map((oldIngredient) => {
@@ -508,7 +610,11 @@ export default function GamePage() {
                         };
                       }
                       // check if the one i'm clicking has an amount of 0
-                      else if (ingredient.amount > 0 && ingredient.stock > 0) {
+                      else if (
+                        ingredient.amount > 0 &&
+                        ingredient.stock > 0 &&
+                        !ingredient.spoiled
+                      ) {
                         return {
                           ...oldIngredient,
                           amount: oldIngredient.amount - 1,
@@ -552,7 +658,7 @@ export default function GamePage() {
                         };
                       }
                       // check if the one i'm clicking has an amount of 0
-                      else if (container.stock > 0) {
+                      else if (container.stock > 0 && !ingredient.spoiled) {
                         return {
                           ...container,
                           stock: container.stock - 1,
@@ -667,8 +773,26 @@ export default function GamePage() {
         </button>
         <div css={fliesStyles(flies)}>THE FLIES</div>
 
-        <div>{Timer()}</div>
+        <div>{Timer(score, props.username, props.userId)}</div>
       </div>
     </div>
   );
+}
+
+export async function getServerSideProps(context) {
+  const user = await getUserByValidSessionToken(
+    context.req.cookies.sessionToken,
+  );
+
+  // const allScores = await getAllScores();
+  console.log('user', user);
+  if (!user) {
+    return { props: {} };
+  }
+  return {
+    props: {
+      username: user.username,
+      userId: user.id,
+    },
+  };
 }

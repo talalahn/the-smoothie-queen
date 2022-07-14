@@ -47,7 +47,7 @@ const registerLoginStyles = css`
 
 export type Props = {
   refreshUserProfile: () => Promise<void>;
-  user?: User;
+  // user?: User;
 };
 export default function Register(props: Props) {
   const [username, setUsername] = useState('');

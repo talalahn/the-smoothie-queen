@@ -1,4 +1,3 @@
-// import { GetServerSidePropsContext } from 'next';
 import { css } from '@emotion/react';
 import { GetServerSidePropsContext } from 'next';
 import Head from 'next/head';
