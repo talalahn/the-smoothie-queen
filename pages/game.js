@@ -2,7 +2,11 @@ import { css } from '@emotion/react';
 import Image from 'next/image.js';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
-import { getAllScores, getUserByValidSessionToken } from '../utils/database';
+import {
+  getAllScores,
+  getPersonalScores,
+  getUserByValidSessionToken,
+} from '../utils/database';
 // import { saveScore } from '../utils/database';
 import { formatTimer } from '../utils/formatTimer';
 
@@ -18,6 +22,37 @@ const wrapperStyles = css`
   > div {
     position: absolute;
     z-index: 100;
+  }
+  > button {
+    position: absolute;
+    z-index: 100;
+    right: 0%;
+  }
+`;
+
+const ingredientsStyles = css`
+  position: absolute;
+  bottom: 10%;
+  left: 5%;
+  display: grid;
+  grid-template-columns: 100px 100px;
+  grid-template-rows: 50px 50px;
+  column-gap: 10px;
+  row-gap: 15px;
+`;
+
+const containerIngredientsStyles = css`
+  position: absolute;
+  bottom: 10%;
+  right: 5%;
+  display: grid;
+  grid-template-columns: 50px 50px;
+  grid-template-rows: 50px 50px;
+  column-gap: 5px;
+  row-gap: 5px;
+
+  > button {
+    font-size: 10px;
   }
 `;
 
@@ -35,6 +70,20 @@ const pauseMenuStyles = (paused) => css`
   text-justify: center;
   z-index: ${paused ? '1000' : '-10'};
 `;
+const startMenuStyles = (paused, displayTime) => css`
+  width: 620px;
+  height: 360px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  background-color: black;
+  opacity: 90%;
+  color: white;
+  text-align: center;
+  text-justify: center;
+  z-index: ${paused && displayTime === 0 ? '1000000' : '-1000000'};
+`;
 
 const gameOverMenuStyles = (gameOver) => css`
   width: 620px;
@@ -50,7 +99,7 @@ const gameOverMenuStyles = (gameOver) => css`
   text-justify: center;
   z-index: ${gameOver ? '10000' : '-10'};
 `;
-const highscoreMenuStyles = (scoreState) => css`
+const highscoreMenuStyles = (scoreState, highscoreState) => css`
   width: 620px;
   height: 360px;
   top: 50%;
@@ -62,7 +111,7 @@ const highscoreMenuStyles = (scoreState) => css`
   color: white;
   text-align: center;
   text-justify: center;
-  z-index: ${scoreState ? '100000' : '-10'};
+  z-index: ${scoreState || highscoreState ? '10000000' : '-10'};
 `;
 
 const dragQueenStyles = (dragQueen) => css`
@@ -85,12 +134,6 @@ const dragQueenStyles = (dragQueen) => css`
   /* margin-bottom: 100px; */
 `;
 
-const containerIngredientsStyles = css`
-  margin-top: 400px;
-  > button {
-    margin-right: 10px;
-  }
-`;
 const ingredientButtonStyles = (ingredient) => css`
   background-color: ${ingredient.spoiled ? 'green' : 'none'};
 `;
@@ -100,6 +143,7 @@ const fliesStyles = (flies) => css`
   padding: 10px;
   position: absolute;
   left: ${flies.state ? '200px' : '20px'};
+  background-color: ${flies.state ? 'red' : 'none'};
 `;
 // TODOS:
 
@@ -109,19 +153,17 @@ const fliesStyles = (flies) => css`
 //        - start button
 //        - not logged in? message: your score will not be saved
 //        - button: rules -> rules show up
-//        - save score into database
-//        - take score from database and display on gameover menu
-//        - sort scores on database
-//        - take top 10 scores from database and display on gameoverMenu
 // - create a readme file
 
 // list state up of paused
 let paused;
 let displayTime;
+// let timerId
 let roundedDisplayTime;
 let gameOver = false;
 let intervalDependentFunctions = [];
 let scoreState = false;
+let highscoreState = false;
 
 // this function sets the time (frameTime) from the moment the page reloads
 function useFrameTime() {
@@ -159,18 +201,37 @@ function useFrameTime() {
 }
 
 // this function allows to pause and play the time (displayTime)
-function Timer(score, username, userId) {
+function Timer(
+  score,
+  username,
+  userId,
+  allScores,
+  personalScores,
+  pauseTime,
+  setPauseTime,
+  pause,
+) {
   const [startTime, setStartTime] = useState(0);
-  const [pauseTime, setPauseTime] = useState(0);
+  // const [pauseTime, setPauseTime] = useState(0);
   const [alias, setAlias] = useState();
   const [errors, setErrors] = useState([]);
   const router = useRouter();
+  const [updatedGlobalScores, setUpdatedGlobalScores] = useState(allScores);
+  const [updatedPersonalScores, setUpdatedPersonalScores] =
+    useState(personalScores);
+  const [highscoreGlobalScoresButton, setHighscoreGlobalScoresButton] =
+    useState(true);
   function handleRestart() {
     // page.reload
     router.reload(window.location.pathname);
   }
-  console.log(username, userId);
+  function handleHighscoreToggleButton() {
+    setHighscoreGlobalScoresButton(!highscoreGlobalScoresButton);
+  }
 
+  function handleShowHighscores() {
+    highscoreState = true;
+  }
   async function handleSaveScore() {
     scoreState = true;
     if (userId) {
@@ -187,58 +248,69 @@ function Timer(score, username, userId) {
       });
 
       const saveScoreResponseBody = await saveScoreResponse.json();
-      console.log(saveScoreResponseBody);
 
       if ('errors' in saveScoreResponseBody) {
         setErrors(saveScoreResponseBody.errors);
         return;
       }
-    }
-    //
-    // add score to scores table
-  }
-  async function handleShowScores() {
-    const saveScoreResponse = await fetch('/api/scores', {
-      method: 'GET',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
+      const finalUpdatedGlobalScores = updatedGlobalScores;
+      if (saveScoreResponseBody.newScore.score > updatedGlobalScores[9].score) {
+        finalUpdatedGlobalScores.pop();
+        finalUpdatedGlobalScores.push(saveScoreResponseBody.newScore);
+        finalUpdatedGlobalScores.sort((a, b) => {
+          return b.score - a.score;
+        });
 
-    const saveScoreResponseBody = await saveScoreResponse.json();
-    console.log(saveScoreResponseBody);
+        setUpdatedGlobalScores(finalUpdatedGlobalScores);
+      }
 
-    if ('errors' in saveScoreResponseBody) {
-      setErrors(saveScoreResponseBody.errors);
-      return;
+      const finalUpdatedPersonalScores = updatedPersonalScores;
+      if (
+        saveScoreResponseBody.newScore.score > updatedPersonalScores[9].score
+      ) {
+        finalUpdatedPersonalScores.pop();
+        finalUpdatedPersonalScores.push(saveScoreResponseBody.newScore);
+
+        finalUpdatedPersonalScores.sort((a, b) => {
+          return b.score - a.score;
+        });
+        setUpdatedPersonalScores(finalUpdatedPersonalScores);
+      }
     }
   }
-  //
-  // add score to scores table
 
   paused = pauseTime !== undefined;
   const frameTime = useFrameTime();
   displayTime = paused ? pauseTime : frameTime - startTime;
-  let timerId;
-  function pause() {
-    setPauseTime(displayTime);
-    clearInterval(timerId);
-  }
+  // timerId;
+  // function pause() {
+  //   setPauseTime(displayTime);
+  //   clearInterval(timerId);
+  // }
   function play() {
     setStartTime(performance.now() - pauseTime);
     setPauseTime(undefined);
   }
 
   if (!gameOver) {
-    handleShowScores();
     return (
       <>
         <div>{formatTimer(displayTime)}</div>
-        <button onClick={paused ? play : pause}>
-          {' '}
-          {paused ? 'Play' : ' Pause'}
-        </button>
-        <div css={pauseMenuStyles(paused)}>PAUSE MENU</div>
+
+        <div css={pauseMenuStyles(paused)}>
+          PAUSE MENU
+          <button>RULES</button>
+          <button onClick={handleShowHighscores}>HIGH SCORES</button>
+          <button onClick={paused ? play : pause}>
+            {paused ? 'Play' : ' Pause'}
+          </button>
+        </div>
+        <div css={startMenuStyles(paused, displayTime)}>
+          START MENU
+          <button>RULES</button>
+          <button onClick={handleShowHighscores}>HIGH SCORES</button>
+          <button onClick={play}>START</button>
+        </div>
       </>
     );
   } else if (gameOver && !scoreState && userId) {
@@ -271,16 +343,76 @@ function Timer(score, username, userId) {
         <div>GAME OVER</div>
         <div>SCORE: {score} </div>
         <div>HIGH SCORES</div>
-        {/* <div>{getAllScores()}</div> */}
+        <div>
+          {allScores.map((globalScore) => {
+            return (
+              <div
+                key={`global-${globalScore.alias}-${globalScore.score}-${
+                  Math.random() * 1000
+                }`}
+              >
+                <div>
+                  {globalScore.alias}...
+                  {globalScore.score}
+                </div>
+              </div>
+            );
+          })}
+        </div>
 
         <button onClick={handleRestart}>PLAY AGAIN?</button>
       </div>
     );
   } else {
     return (
-      <div css={highscoreMenuStyles(scoreState)}>
+      <div css={highscoreMenuStyles(scoreState, highscoreState)}>
         <div>HIGH SCORES</div>
-        {/* get score from database */}
+        {highscoreGlobalScoresButton ? (
+          <div>
+            TOP 10 GLOBAL SCORES
+            {updatedGlobalScores.map((globalScore) => {
+              return (
+                <div
+                  key={`global-${globalScore.alias}-${globalScore.score}-${
+                    Math.random() * 1000
+                  }`}
+                >
+                  <div>
+                    {globalScore.alias}...
+                    {globalScore.score}...
+                    {allScores.indexOf(globalScore) + 1}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        ) : (
+          <div>
+            TOP 10 PERSONAL SCORES
+            {updatedPersonalScores.map((personalScore) => {
+              return (
+                <div
+                  key={`personal-${personalScore.alias}-${
+                    personalScore.score
+                  }-${Math.random() * 1000}`}
+                >
+                  <div>
+                    {personalScore.alias}...
+                    {personalScore.score}...
+                    {updatedPersonalScores.indexOf(personalScore) + 1}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+
+        <button onClick={handleHighscoreToggleButton}>
+          {highscoreGlobalScoresButton
+            ? 'SHOW PERSONAL SCORES'
+            : 'SHOW GLOBAL SCORES'}
+        </button>
+        <br />
 
         <button onClick={handleRestart}>PLAY AGAIN?</button>
       </div>
@@ -290,6 +422,8 @@ function Timer(score, username, userId) {
 
 export default function GamePage(props) {
   const [score, setScore] = useState(0);
+  const [pauseTime, setPauseTime] = useState(0);
+
   const [ingredientCounters, setIngredientCounters] = useState([
     {
       id: 'bananas',
@@ -379,7 +513,17 @@ export default function GamePage(props) {
   });
 
   // FUNCTIONS
+  let timerId;
+  function pause() {
+    setPauseTime(displayTime);
+    clearInterval(timerId);
+  }
 
+  let backupState = false;
+
+  function handleBackupState() {
+    backupState = !backupState;
+  }
   const makeDragQueenTrue = useCallback(() => {
     // use function as argument in useState (prevState)
     setDragQueens((prevState) => {
@@ -430,7 +574,6 @@ export default function GamePage(props) {
   }
 
   function endGame() {
-    console.log('GAME OVER');
     gameOver = true;
   }
 
@@ -440,7 +583,6 @@ export default function GamePage(props) {
         return prevState.map((ingredient) => {
           if (roundedDisplayTime >= flies.enterTime + 6000) {
             if (prevState.indexOf(ingredient) === flies.ingredientPosition) {
-              console.log('foodSpoils');
               return { ...ingredient, spoiled: true };
             } else {
               return { ...ingredient };
@@ -454,7 +596,6 @@ export default function GamePage(props) {
   }, [flies]);
 
   const makeDragQueenAngrier = useCallback(() => {
-    console.log(roundedDisplayTime);
     // use function as argument in useState (prevState)
     setDragQueens((prevState) => {
       return prevState.map((dragQueen) => {
@@ -462,7 +603,6 @@ export default function GamePage(props) {
           dragQueen.state &&
           roundedDisplayTime >= dragQueen.enterTime + 6000
         ) {
-          console.log(`this drag is getting angry ${dragQueen.id} `);
           return {
             ...dragQueen,
             enterTime: roundedDisplayTime,
@@ -530,9 +670,159 @@ export default function GamePage(props) {
       <div>
         <div css={wrapperStyles}>
           <div>Score: {score}</div>
+          <button onClick={pause}>PAUSE</button>
+          <div css={ingredientsStyles}>
+            {/* the ingredients */}
+            {ingredientInfo.map((ingredient) => (
+              <button
+                key={`ingredient-${ingredient.id}`}
+                css={ingredientButtonStyles(ingredient)}
+                onClick={() => {
+                  setIngredientCounters(
+                    ingredientCounters.map((oldIngredient) => {
+                      // check if this is the one i'm clicking
+                      if (ingredient.id === oldIngredient.id) {
+                        if (oldIngredient.spoiled && !flies.state) {
+                          return {
+                            ...ingredient,
+                            spoiled: false,
+                          };
+                        }
+                        // check if the one i'm clicking has an amount of 0
+                        else if (
+                          ingredient.amount > 0 &&
+                          ingredient.stock > 0 &&
+                          !ingredient.spoiled
+                        ) {
+                          return {
+                            ...oldIngredient,
+                            amount: oldIngredient.amount - 1,
+                          };
+                        } else if (
+                          ingredient.amount > 0 &&
+                          ingredient.stock === 0
+                        ) {
+                          return { ...oldIngredient };
+                        } else if (
+                          ingredient.amount === 0 &&
+                          ingredient.stock > 0
+                        ) {
+                          // reduce score by 5
+                          if (score !== 0) {
+                            setScore(score - 5);
+                            return { ...oldIngredient };
+                          } else {
+                            setScore(0);
+                            return { ...oldIngredient };
+                          }
+                        } else {
+                          return {
+                            ...oldIngredient,
+                          };
+                        }
+                      } else {
+                        return { ...oldIngredient };
+                      }
+                    }),
+                  );
+                  setContainerCounters(
+                    containerCounters.map((container) => {
+                      // check if this is the one i'm clicking
+                      if (ingredient.id === container.id) {
+                        if (ingredient.spoiled && !flies.state) {
+                          return {
+                            ...container,
+                            stock: 0,
+                          };
+                        }
+                        // check if the one i'm clicking has an amount of 0
+                        else if (container.stock > 0 && !ingredient.spoiled) {
+                          return {
+                            ...container,
+                            stock: container.stock - 1,
+                          };
+                        } else {
+                          return { ...container };
+                        }
+                      } else {
+                        return { ...container };
+                      }
+                    }),
+                  );
+                }}
+              >
+                {ingredientInfo.map((singleIngredientInfo) => {
+                  if (ingredient.id === singleIngredientInfo.id) {
+                    return (
+                      <>
+                        <span>{singleIngredientInfo.id}</span>
+                        <br />
+                        <span>amount: {singleIngredientInfo.amount}</span>
+                        <br />
+                        {/* for some reason this isn't showing */}
+                        <span>spoiled: {singleIngredientInfo.spoiled}</span>
+                      </>
+                    );
+                  }
+                })}
+              </button>
+            ))}
+          </div>
+          <div css={containerIngredientsStyles}>
+            {/* THE BACKUP INGREDIENTS */}
+            {ingredientInfo.map((ingredient) => (
+              <button
+                key={`backupIngredient-${ingredient.id}`}
+                onClick={() => {
+                  setContainerCounters(
+                    containerCounters.map((container) => {
+                      // check if this is the one i'm clicking
+                      if (ingredient.id === container.id) {
+                        // check if the stock is below 9
+                        if (container.stock <= 9) {
+                          return {
+                            ...container,
+                            stock: container.stock + 3,
+                          };
+                        } else {
+                          return { ...container, stock: 12 };
+                        }
+                      } else {
+                        return { ...container };
+                      }
+                    }),
+                  );
+                }}
+              >
+                {' '}
+                {ingredientInfo.map((singleIngredientInfo) => {
+                  if (ingredient.id === singleIngredientInfo.id) {
+                    return (
+                      <>
+                        <span>{singleIngredientInfo.id}</span>
+                        <br />
+                        <span>stock: {singleIngredientInfo.stock}</span>
+                      </>
+                    );
+                  }
+                })}
+              </button>
+            ))}
+          </div>
           <Image src="/background.png" width="640" height="380" />
         </div>
-
+        <div>
+          {Timer(
+            score,
+            props.username,
+            props.userId,
+            props.allScores,
+            props.personalScores,
+            pauseTime,
+            setPauseTime,
+            pause,
+          )}
+        </div>
         {/* the drag queens */}
         {dragQueens.map((dragQueen) => (
           <div
@@ -590,191 +880,20 @@ export default function GamePage(props) {
             </button>
           </div>
         ))}
-
-        <div>
-          {/* the ingredients */}
-          {ingredientInfo.map((ingredient) => (
-            <button
-              key={`ingredient-${ingredient.id}`}
-              css={ingredientButtonStyles(ingredient)}
-              onClick={() => {
-                setIngredientCounters(
-                  ingredientCounters.map((oldIngredient) => {
-                    // check if this is the one i'm clicking
-                    if (ingredient.id === oldIngredient.id) {
-                      if (oldIngredient.spoiled && !flies.state) {
-                        console.log('food no longer spoiled');
-                        return {
-                          ...ingredient,
-                          spoiled: false,
-                        };
-                      }
-                      // check if the one i'm clicking has an amount of 0
-                      else if (
-                        ingredient.amount > 0 &&
-                        ingredient.stock > 0 &&
-                        !ingredient.spoiled
-                      ) {
-                        return {
-                          ...oldIngredient,
-                          amount: oldIngredient.amount - 1,
-                        };
-                      } else if (
-                        ingredient.amount > 0 &&
-                        ingredient.stock === 0
-                      ) {
-                        return { ...oldIngredient };
-                      } else if (
-                        ingredient.amount === 0 &&
-                        ingredient.stock > 0
-                      ) {
-                        // reduce score by 5
-                        if (score !== 0) {
-                          setScore(score - 5);
-                          return { ...oldIngredient };
-                        } else {
-                          setScore(0);
-                          return { ...oldIngredient };
-                        }
-                      } else {
-                        return {
-                          ...oldIngredient,
-                        };
-                      }
-                    } else {
-                      return { ...oldIngredient };
-                    }
-                  }),
-                );
-                setContainerCounters(
-                  containerCounters.map((container) => {
-                    // check if this is the one i'm clicking
-                    if (ingredient.id === container.id) {
-                      if (ingredient.spoiled && !flies.state) {
-                        console.log('food thrown away');
-                        return {
-                          ...container,
-                          stock: 0,
-                        };
-                      }
-                      // check if the one i'm clicking has an amount of 0
-                      else if (container.stock > 0 && !ingredient.spoiled) {
-                        return {
-                          ...container,
-                          stock: container.stock - 1,
-                        };
-                      } else {
-                        return { ...container };
-                      }
-                    } else {
-                      return { ...container };
-                    }
-                  }),
-                );
-              }}
-            >
-              {ingredientInfo.map((singleIngredientInfo) => {
-                if (ingredient.id === singleIngredientInfo.id) {
-                  return (
-                    <>
-                      <span>{singleIngredientInfo.id}</span>
-                      <br />
-                      <span>amount: {singleIngredientInfo.amount}</span>
-                      <br />
-                      {/* for some reason this isn't showing */}
-                      <span>spoiled: {singleIngredientInfo.spoiled}</span>
-                    </>
-                  );
-                }
-              })}
-            </button>
-          ))}
-        </div>
-
-        <br />
-
-        <button
-          onClick={() => {
-            console.log(dragQueens);
-            // dragQueens[1].patienceMeter = 3;
-            console.log(flies);
-            console.log(ingredientCounters);
-            console.log(ingredientInfo);
-          }}
-        >
-          console.log
-        </button>
       </div>
-      <div css={containerIngredientsStyles}>
-        {/* THE BACKUP INGREDIENTS */}
-        {ingredientInfo.map((ingredient) => (
-          <button
-            key={`backupIngredient-${ingredient.id}`}
-            onClick={() => {
-              setContainerCounters(
-                containerCounters.map((container) => {
-                  // check if this is the one i'm clicking
-                  if (ingredient.id === container.id) {
-                    // check if the stock is below 9
-                    if (container.stock <= 9) {
-                      return {
-                        ...container,
-                        stock: container.stock + 3,
-                      };
-                    } else {
-                      return { ...container, stock: 12 };
-                    }
-                  } else {
-                    return { ...container };
-                  }
-                }),
-              );
-            }}
-          >
-            {' '}
-            {ingredientInfo.map((singleIngredientInfo) => {
-              if (ingredient.id === singleIngredientInfo.id) {
-                return (
-                  <>
-                    <span>{singleIngredientInfo.id}</span>
-                    <br />
-                    <span>stock: {singleIngredientInfo.stock}</span>
-                  </>
-                );
-              }
-            })}
-          </button>
-        ))}
-        <button
-          onClick={() => {
-            if (!flies.state) {
-              setFlies({
-                state: true,
-                enterTime: roundedDisplayTime,
-                ingredientPosition: Math.floor(
-                  Math.random() * ingredientCounters.length,
-                ),
-              });
-            }
-          }}
-        >
-          Set flies to true
-        </button>
-        <button
-          onClick={() => {
-            setFlies({
-              state: false,
-              enterTime: 0,
-              ingredientPosition: 0,
-            });
-          }}
-        >
-          Set flies to false
-        </button>
-        <div css={fliesStyles(flies)}>THE FLIES</div>
 
-        <div>{Timer(score, props.username, props.userId)}</div>
-      </div>
+      <div css={fliesStyles(flies)}>THE FLIES</div>
+      <button
+        onClick={() => {
+          setFlies({
+            state: false,
+            enterTime: 0,
+            ingredientPosition: 0,
+          });
+        }}
+      >
+        Set flies to false
+      </button>
     </div>
   );
 }
@@ -784,15 +903,20 @@ export async function getServerSideProps(context) {
     context.req.cookies.sessionToken,
   );
 
-  // const allScores = await getAllScores();
-  console.log('user', user);
+  const allScores = await getAllScores();
+
   if (!user) {
-    return { props: {} };
+    return { props: { allScores: allScores } };
   }
+
+  const personalScores = await getPersonalScores(user.id);
+
   return {
     props: {
       username: user.username,
       userId: user.id,
+      allScores: allScores,
+      personalScores: personalScores,
     },
   };
 }

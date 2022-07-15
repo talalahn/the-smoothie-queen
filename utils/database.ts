@@ -188,7 +188,7 @@ export async function deleteExpiredSession() {
   return sessions.map((session) => camelcaseKeys(session));
 }
 
-type Score = {
+export type Score = {
   alias: string;
   score: number;
   userId: number;
@@ -209,24 +209,32 @@ export async function saveScore(alias: string, score: number, userId: number) {
 }
 
 export async function getAllScores() {
-  const [scores] = await sql<[Score]>`
+  const scores = await sql<[Omit<Score, 'userId'>]>`
   SELECT
       alias, score
   FROM
       scores
+  ORDER BY
+      score DESC
+  LIMIT
+      10
 `;
   return scores;
 }
 
 export async function getPersonalScores(userId: number) {
   console.log('saveScore check', userId);
-  const [scores] = await sql<[Score]>`
+  const scores = await sql<[Score]>`
   SELECT
       alias, score
   FROM
       scores
   WHERE
       user_id = ${userId}
+  ORDER BY
+      score DESC
+   LIMIT
+      10
 
 `;
   return scores;
