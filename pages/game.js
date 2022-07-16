@@ -40,7 +40,15 @@ const ingredientsStyles = css`
   column-gap: 10px;
   row-gap: 15px;
 `;
-
+const backupButtonStyles = (openBackup) => css`
+  position: relative;
+  bottom: 10%;
+  right: 5%;
+  display: grid;
+  grid-template-columns: 105px;
+  grid-template-rows: 105px;
+  margin-bottom: ${openBackup ? '100px' : '-100px'};
+`;
 const containerIngredientsStyles = css`
   position: absolute;
   bottom: 10%;
@@ -54,6 +62,24 @@ const containerIngredientsStyles = css`
   > button {
     font-size: 10px;
   }
+`;
+
+const fliesStyles = (flies) => css`
+  position: absolute;
+  bottom: 10%;
+  left: ${flies.state ? '0%' : '50%'};
+
+  border: 1px solid black;
+  padding: 10px;
+  background-color: ${flies.state ? 'red' : 'none'};
+  z-index: ${flies.state ? '100' : '-100'};
+`;
+
+const flySwatterStyles = css`
+  position: absolute;
+  bottom: 20%;
+  left: 60%;
+  transform: rotate(45deg);
 `;
 
 const pauseMenuStyles = (paused) => css`
@@ -98,6 +124,14 @@ const gameOverMenuStyles = (gameOver) => css`
   text-align: center;
   text-justify: center;
   z-index: ${gameOver ? '10000' : '-10'};
+
+  > div > div {
+    display: grid;
+    grid-template-columns: 50px 50px;
+    grid-template-rows: 50px 50px;
+    column-gap: 5px;
+    row-gap: 5px;
+  }
 `;
 const highscoreMenuStyles = (scoreState, highscoreState) => css`
   width: 620px;
@@ -138,19 +172,12 @@ const ingredientButtonStyles = (ingredient) => css`
   background-color: ${ingredient.spoiled ? 'green' : 'none'};
 `;
 
-const fliesStyles = (flies) => css`
-  border: 1px solid black;
-  padding: 10px;
-  position: absolute;
-  left: ${flies.state ? '200px' : '20px'};
-  background-color: ${flies.state ? 'red' : 'none'};
-`;
 // TODOS:
 
 // - figure out how to make sprite work with patienceMeter
 // - create array of coordinates for each ingredientPosition
-// - create start menu
-//        - start button
+// - configure home, the login, and register pages
+// - start menu
 //        - not logged in? message: your score will not be saved
 //        - button: rules -> rules show up
 // - create a readme file
@@ -377,11 +404,9 @@ function Timer(
                     Math.random() * 1000
                   }`}
                 >
-                  <div>
-                    {globalScore.alias}...
-                    {globalScore.score}...
-                    {allScores.indexOf(globalScore) + 1}
-                  </div>
+                  <div>{globalScore.alias}</div>
+                  <div>{globalScore.score}</div>
+                  <div>{allScores.indexOf(globalScore) + 1}</div>
                 </div>
               );
             })}
@@ -396,11 +421,9 @@ function Timer(
                     personalScore.score
                   }-${Math.random() * 1000}`}
                 >
-                  <div>
-                    {personalScore.alias}...
-                    {personalScore.score}...
-                    {updatedPersonalScores.indexOf(personalScore) + 1}
-                  </div>
+                  <div>{personalScore.alias}</div>
+                  <div>{personalScore.score}</div>
+                  <div>{updatedPersonalScores.indexOf(personalScore) + 1}</div>
                 </div>
               );
             })}
@@ -519,11 +542,12 @@ export default function GamePage(props) {
     clearInterval(timerId);
   }
 
-  let backupState = false;
+  let openBackup = false;
 
-  function handleBackupState() {
-    backupState = !backupState;
+  function handleOpenBackup() {
+    openBackup = true;
   }
+
   const makeDragQueenTrue = useCallback(() => {
     // use function as argument in useState (prevState)
     setDragQueens((prevState) => {
@@ -768,6 +792,9 @@ export default function GamePage(props) {
               </button>
             ))}
           </div>
+          <div css={backupButtonStyles(openBackup)}>
+            <button onClick={handleOpenBackup}>BACKUP</button>
+          </div>
           <div css={containerIngredientsStyles}>
             {/* THE BACKUP INGREDIENTS */}
             {ingredientInfo.map((ingredient) => (
@@ -808,6 +835,21 @@ export default function GamePage(props) {
                 })}
               </button>
             ))}
+          </div>
+          <div css={fliesStyles(flies)}>THE FLIES</div>
+          <div css={flySwatterStyles}>
+            <button
+              css={flySwatterStyles}
+              onClick={() => {
+                setFlies({
+                  state: false,
+                  enterTime: 0,
+                  ingredientPosition: 0,
+                });
+              }}
+            >
+              FLY SWATTER
+            </button>
           </div>
           <Image src="/background.png" width="640" height="380" />
         </div>
@@ -881,19 +923,6 @@ export default function GamePage(props) {
           </div>
         ))}
       </div>
-
-      <div css={fliesStyles(flies)}>THE FLIES</div>
-      <button
-        onClick={() => {
-          setFlies({
-            state: false,
-            enterTime: 0,
-            ingredientPosition: 0,
-          });
-        }}
-      >
-        Set flies to false
-      </button>
     </div>
   );
 }
