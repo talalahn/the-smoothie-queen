@@ -41,21 +41,6 @@ const ingredientsStyles = css`
   row-gap: 15px;
 `;
 
-const containerIngredientsStyles = css`
-  position: absolute;
-  bottom: 10%;
-  right: 5%;
-  display: grid;
-  grid-template-columns: 50px 50px;
-  grid-template-rows: 50px 50px;
-  column-gap: 5px;
-  row-gap: 5px;
-
-  > button {
-    font-size: 10px;
-  }
-`;
-
 const fliesStyles = (flies) => css`
   position: absolute;
   height: 110px;
@@ -98,15 +83,18 @@ const blenderStyles = css`
 const doorStyles = (doorButtonState) => css`
   position: absolute;
   width: 255px;
-  height: ${doorButtonState ? '160px' : '300px'};
+  height: ${doorButtonState ? '300px' : '160px'};
   transform: scale(0.5);
-  top: ${doorButtonState ? '60%' : '33%'};
+  top: ${doorButtonState ? '33%' : '60%'};
   left: 65%;
+  padding: 0;
+  background: none;
+  border: none;
   /* transform: translate(-50%, -50%); */
 
   background-image: url(${doorButtonState
-    ? 'door_closed.png'
-    : 'door_open.png'});
+    ? 'door_open.png'
+    : 'door_closed.png'});
 `;
 
 const pauseButtonStyles = css`
@@ -223,27 +211,41 @@ const ingredientButtonStyles = (ingredient) => css`
   height: 100px;
   width: 200px;
   transform: scale(0.5);
-  background-image: url('/strawberries/${ingredient.id}-${ingredient.stock}.png');
+  background-image: url('/${ingredient.id}/${ingredient.id}-${ingredient.stock}.png');
 `;
 
 const ingredientButtonParentStyles = css`
   display: grid;
   grid-template-columns: 100px 100px;
   grid-template-rows: 50px 50px;
-  column-gap: 5px;
-  row-gap: 5px;
+  column-gap: 20px;
+  row-gap: 10px;
   position: absolute;
-  right: 16%;
-  bottom: 17%;
+  right: 13%;
+  bottom: 12.5%;
+`;
+const containerButtonStyles = css`
+  height: 35px;
+  width: 35px;
+  background: none;
+  font-size: 5px;
+`;
+const containerButtonParentStyles = css`
+  display: grid;
+  grid-template-columns: 35px 35px;
+  grid-template-rows: 35px 35px;
+  column-gap: 1px;
+  row-gap: 1px;
+  position: absolute;
+  /* transform: translate(-50%, -50%); */
+  left: 77%;
+  bottom: 10%;
 `;
 
 // TODOS:
 
 // - figure out how to make sprite work with patienceMeter
 // - create array of coordinates for each ingredientPosition
-// - configure home, the login, and register pages
-// - start menu
-//        - not logged in? message: your score will not be saved
 // - create a readme file
 
 // list state up of paused
@@ -314,13 +316,13 @@ export default function GamePage(props) {
       spoiled: false,
     },
     {
-      id: 'ice',
-      amount: 1,
+      id: 'peanutButter',
+      amount: 3,
       spoiled: false,
     },
     {
-      id: 'peanutButter',
-      amount: 3,
+      id: 'spinach',
+      amount: 1,
       spoiled: false,
     },
   ]);
@@ -334,11 +336,11 @@ export default function GamePage(props) {
       stock: 12,
     },
     {
-      id: 'ice',
+      id: 'peanutButter',
       stock: 12,
     },
     {
-      id: 'peanutButter',
+      id: 'spinach',
       stock: 12,
     },
   ]);
@@ -579,7 +581,7 @@ export default function GamePage(props) {
 
   useEffect(() => {
     for (let i = 0; i < dragQueens.length; i++) {
-      if (dragQueens[i].patienceMeter === 3) {
+      if (dragQueens[i].patienceMeter === 5) {
         endGame();
       }
     }
@@ -784,48 +786,58 @@ export default function GamePage(props) {
               ))}
             </div>
           </div>
+          <button
+            onClick={handleBackupDoor}
+            css={doorStyles(doorButtonState)}
+          />
 
-          <div css={containerIngredientsStyles}>
-            {/* THE BACKUP INGREDIENTS */}
-            {ingredientInfo.map((ingredient) => (
-              <button
-                key={`backupIngredient-${ingredient.id}`}
-                onClick={() => {
-                  setContainerCounters(
-                    containerCounters.map((container) => {
-                      // check if this is the one i'm clicking
-                      if (ingredient.id === container.id) {
-                        // check if the stock is below 9
-                        if (container.stock <= 9) {
-                          return {
-                            ...container,
-                            stock: container.stock + 3,
-                          };
+          {/* THE BACKUP INGREDIENTS */}
+          {doorButtonState ? (
+            <div css={containerButtonParentStyles}>
+              {ingredientInfo.map((ingredient) => (
+                <button
+                  css={containerButtonStyles}
+                  key={`backupIngredient-${ingredient.id}`}
+                  onClick={() => {
+                    setContainerCounters(
+                      containerCounters.map((container) => {
+                        // check if this is the one i'm clicking
+                        if (ingredient.id === container.id) {
+                          // check if the stock is below 9
+                          if (container.stock <= 9) {
+                            return {
+                              ...container,
+                              stock: container.stock + 3,
+                            };
+                          } else {
+                            return { ...container, stock: 12 };
+                          }
                         } else {
-                          return { ...container, stock: 12 };
+                          return { ...container };
                         }
-                      } else {
-                        return { ...container };
-                      }
-                    }),
-                  );
-                }}
-              >
-                {' '}
-                {ingredientInfo.map((singleIngredientInfo) => {
-                  if (ingredient.id === singleIngredientInfo.id) {
-                    return (
-                      <>
-                        <span>{singleIngredientInfo.id}</span>
-                        <br />
-                        <span>stock: {singleIngredientInfo.stock}</span>
-                      </>
+                      }),
                     );
-                  }
-                })}
-              </button>
-            ))}
-          </div>
+                  }}
+                >
+                  {' '}
+                  {ingredientInfo.map((singleIngredientInfo) => {
+                    if (ingredient.id === singleIngredientInfo.id) {
+                      return (
+                        <>
+                          <span>{singleIngredientInfo.id}</span>
+                          <br />
+                          <span>stock: {singleIngredientInfo.stock}</span>
+                        </>
+                      );
+                    }
+                  })}
+                </button>
+              ))}
+            </div>
+          ) : (
+            <div />
+          )}
+
           <div css={fliesStyles(flies)} />
           <div css={flySwatterStyles}>
             <Image
@@ -843,9 +855,6 @@ export default function GamePage(props) {
           </div>
           <div css={blenderStyles}>
             <Image src="/blender.png" width="145" height="300" />
-          </div>
-          <div onClick={handleBackupDoor} css={doorStyles(doorButtonState)}>
-            OPEN
           </div>
 
           <Image src="/table.png" width="640" height="380" />
