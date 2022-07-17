@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
 import Image from 'next/image.js';
+import Link from 'next/link';
 import { useRouter } from 'next/router';
 import React, { useCallback, useEffect, useState } from 'react';
 import {
@@ -7,7 +8,6 @@ import {
   getPersonalScores,
   getUserByValidSessionToken,
 } from '../utils/database';
-// import { saveScore } from '../utils/database';
 import { formatTimer } from '../utils/formatTimer';
 
 const wrapperStyles = css`
@@ -40,15 +40,7 @@ const ingredientsStyles = css`
   column-gap: 10px;
   row-gap: 15px;
 `;
-const backupButtonStyles = (openBackup) => css`
-  position: relative;
-  bottom: 10%;
-  right: 5%;
-  display: grid;
-  grid-template-columns: 105px;
-  grid-template-rows: 105px;
-  margin-bottom: ${openBackup ? '100px' : '-100px'};
-`;
+
 const containerIngredientsStyles = css`
   position: absolute;
   bottom: 10%;
@@ -66,110 +58,183 @@ const containerIngredientsStyles = css`
 
 const fliesStyles = (flies) => css`
   position: absolute;
-  bottom: 10%;
-  left: ${flies.state ? '0%' : '50%'};
-
-  border: 1px solid black;
-  padding: 10px;
-  background-color: ${flies.state ? 'red' : 'none'};
+  height: 110px;
+  width: 220px;
+  bottom: 10.5%;
+  left: ${flies.state ? '5%' : '100%'};
   z-index: ${flies.state ? '100' : '-100'};
+  transition: 3000ms;
+  transition-timing-function: ease-out;
+  background-image: url('flies-sprite2.png');
+  animation: fly 0.5s steps(3) infinite;
+
+  @keyframes fly {
+    0% {
+      background-position: 0 0;
+    }
+
+    100% {
+      background-position: 0 -330px;
+    }
+  }
 `;
 
 const flySwatterStyles = css`
   position: absolute;
-  bottom: 20%;
+  bottom: 10%;
   left: 60%;
-  transform: rotate(45deg);
+  height: 80px;
+  width: 40px;
+  cursor: pointer;
+`;
+const blenderStyles = css`
+  position: absolute;
+  bottom: 10%;
+  left: 45%;
+  height: 130px;
+  width: 55px;
 `;
 
-const pauseMenuStyles = (paused) => css`
-  width: 620px;
-  height: 360px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+const doorStyles = (doorButtonState) => css`
   position: absolute;
-  background-color: black;
-  opacity: 90%;
-  color: white;
-  text-align: center;
-  text-justify: center;
-  z-index: ${paused ? '1000' : '-10'};
-`;
-const startMenuStyles = (paused, displayTime) => css`
-  width: 620px;
-  height: 360px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  position: absolute;
-  background-color: black;
-  opacity: 90%;
-  color: white;
-  text-align: center;
-  text-justify: center;
-  z-index: ${paused && displayTime === 0 ? '1000000' : '-1000000'};
+  width: 255px;
+  height: ${doorButtonState ? '160px' : '300px'};
+  transform: scale(0.5);
+  top: ${doorButtonState ? '60%' : '33%'};
+  left: 65%;
+  /* transform: translate(-50%, -50%); */
+
+  background-image: url(${doorButtonState
+    ? 'door_closed.png'
+    : 'door_open.png'});
 `;
 
-const gameOverMenuStyles = (gameOver) => css`
+const pauseButtonStyles = css`
+  border: 0;
+  background: transparent;
+  box-sizing: border-box;
+  width: 0;
+  height: 74px;
+  border-color: transparent transparent transparent #aa336a;
+  transition: 100ms all ease;
+  cursor: pointer;
+  border-style: double;
+  border-width: 0px 0 0px 60px;
+  transform: scale(0.3);
+`;
+
+const pauseMenuStyles = css`
   width: 620px;
   height: 360px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
-  background-color: black;
-  opacity: 90%;
+  background-color: #0042ff;
+  /* opacity: 90%; */
   color: white;
   text-align: center;
   text-justify: center;
-  z-index: ${gameOver ? '10000' : '-10'};
+`;
+const startMenuStyles = css`
+  width: 620px;
+  height: 360px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  background-color: #ffd117;
+  opacity: 30%;
+  color: white;
+  text-align: center;
+  text-justify: center;
+`;
+
+const gameOverMenuStyles = css`
+  width: 620px;
+  height: 360px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  background-color: #0042ff;
+  /* opacity: 90%; */
+  color: white;
+  text-align: center;
+  text-justify: center;
 
   > div > div {
     display: grid;
-    grid-template-columns: 50px 50px;
-    grid-template-rows: 50px 50px;
+    grid-template-columns: 50px 50px 50px;
+    grid-template-rows: 5px 5px 5px;
     column-gap: 5px;
     row-gap: 5px;
   }
 `;
-const highscoreMenuStyles = (scoreState, highscoreState) => css`
+const highscoreMenuStyles = css`
   width: 620px;
   height: 360px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
-  background-color: black;
-  opacity: 90%;
+  background-color: #0042ff;
+  /* opacity: 90%; */
   color: white;
   text-align: center;
   text-justify: center;
-  z-index: ${scoreState || highscoreState ? '10000000' : '-10'};
+`;
+
+const highscoreGridStyles = css`
+  > div {
+    position: relative;
+    left: 37%;
+    display: grid;
+    grid-template-columns: 50px 50px 50px;
+    grid-template-rows: 5px 5px 5px;
+    column-gap: 5px;
+    row-gap: 5px;
+  }
 `;
 
 const dragQueenStyles = (dragQueen) => css`
-  background-color: ${dragQueen.state ? 'pink' : 'white'};
   border: 1px solid black;
   border-radius: 50%;
-  height: 30px;
-  width: 30px;
+  height: 200px;
+  width: 100px;
   text-align: center;
   position: absolute;
-  transform: translateX(
-      ${dragQueen.state ? `${dragQueen.position}px` : '800px'}
-    )
-    // between 200-600
-    translateY(300px);
-  left: ${dragQueen.state ? '20px' : '0'};
+  top: 10%;
+  right: 100%;
+  transform: translate(-50%, -50%)
+    translateX(${dragQueen.state ? `${dragQueen.position}px` : '765px'});
+  transition: 3000ms;
+  transition-timing-function: linear;
   :hover {
     cursor: pointer;
   }
-  /* margin-bottom: 100px; */
 `;
 
 const ingredientButtonStyles = (ingredient) => css`
+  border: none;
+  padding: 0;
+  background: none;
   background-color: ${ingredient.spoiled ? 'green' : 'none'};
+  height: 100px;
+  width: 200px;
+  transform: scale(0.5);
+  background-image: url('/strawberries/${ingredient.id}-${ingredient.stock}.png');
+`;
+
+const ingredientButtonParentStyles = css`
+  display: grid;
+  grid-template-columns: 100px 100px;
+  grid-template-rows: 50px 50px;
+  column-gap: 5px;
+  row-gap: 5px;
+  position: absolute;
+  right: 16%;
+  bottom: 17%;
 `;
 
 // TODOS:
@@ -179,18 +244,15 @@ const ingredientButtonStyles = (ingredient) => css`
 // - configure home, the login, and register pages
 // - start menu
 //        - not logged in? message: your score will not be saved
-//        - button: rules -> rules show up
 // - create a readme file
 
 // list state up of paused
 let paused;
 let displayTime;
-// let timerId
 let roundedDisplayTime;
 let gameOver = false;
 let intervalDependentFunctions = [];
 let scoreState = false;
-let highscoreState = false;
 
 // this function sets the time (frameTime) from the moment the page reloads
 function useFrameTime() {
@@ -227,235 +289,28 @@ function useFrameTime() {
   return frameTime;
 }
 
-// this function allows to pause and play the time (displayTime)
-function Timer(
-  score,
-  username,
-  userId,
-  allScores,
-  personalScores,
-  pauseTime,
-  setPauseTime,
-  pause,
-) {
-  const [startTime, setStartTime] = useState(0);
-  // const [pauseTime, setPauseTime] = useState(0);
-  const [alias, setAlias] = useState();
-  const [errors, setErrors] = useState([]);
+export default function GamePage(props) {
   const router = useRouter();
-  const [updatedGlobalScores, setUpdatedGlobalScores] = useState(allScores);
-  const [updatedPersonalScores, setUpdatedPersonalScores] =
-    useState(personalScores);
-  const [highscoreGlobalScoresButton, setHighscoreGlobalScoresButton] =
-    useState(true);
-  function handleRestart() {
-    // page.reload
-    router.reload(window.location.pathname);
-  }
-  function handleHighscoreToggleButton() {
-    setHighscoreGlobalScoresButton(!highscoreGlobalScoresButton);
-  }
-
-  function handleShowHighscores() {
-    highscoreState = true;
-  }
-  async function handleSaveScore() {
-    scoreState = true;
-    if (userId) {
-      const saveScoreResponse = await fetch('/api/scores', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          alias: alias,
-          score: score,
-          userId: userId,
-        }),
-      });
-
-      const saveScoreResponseBody = await saveScoreResponse.json();
-
-      if ('errors' in saveScoreResponseBody) {
-        setErrors(saveScoreResponseBody.errors);
-        return;
-      }
-      const finalUpdatedGlobalScores = updatedGlobalScores;
-      if (saveScoreResponseBody.newScore.score > updatedGlobalScores[9].score) {
-        finalUpdatedGlobalScores.pop();
-        finalUpdatedGlobalScores.push(saveScoreResponseBody.newScore);
-        finalUpdatedGlobalScores.sort((a, b) => {
-          return b.score - a.score;
-        });
-
-        setUpdatedGlobalScores(finalUpdatedGlobalScores);
-      }
-
-      const finalUpdatedPersonalScores = updatedPersonalScores;
-      if (
-        saveScoreResponseBody.newScore.score > updatedPersonalScores[9].score
-      ) {
-        finalUpdatedPersonalScores.pop();
-        finalUpdatedPersonalScores.push(saveScoreResponseBody.newScore);
-
-        finalUpdatedPersonalScores.sort((a, b) => {
-          return b.score - a.score;
-        });
-        setUpdatedPersonalScores(finalUpdatedPersonalScores);
-      }
-    }
-  }
-
+  const [startTime, setStartTime] = useState(0);
+  const [pauseTime, setPauseTime] = useState(0);
   paused = pauseTime !== undefined;
   const frameTime = useFrameTime();
   displayTime = paused ? pauseTime : frameTime - startTime;
-  // timerId;
-  // function pause() {
-  //   setPauseTime(displayTime);
-  //   clearInterval(timerId);
-  // }
-  function play() {
-    setStartTime(performance.now() - pauseTime);
-    setPauseTime(undefined);
-  }
-
-  if (!gameOver) {
-    return (
-      <>
-        <div>{formatTimer(displayTime)}</div>
-
-        <div css={pauseMenuStyles(paused)}>
-          PAUSE MENU
-          <button>RULES</button>
-          <button onClick={handleShowHighscores}>HIGH SCORES</button>
-          <button onClick={paused ? play : pause}>
-            {paused ? 'Play' : ' Pause'}
-          </button>
-        </div>
-        <div css={startMenuStyles(paused, displayTime)}>
-          START MENU
-          <button>RULES</button>
-          <button onClick={handleShowHighscores}>HIGH SCORES</button>
-          <button onClick={play}>START</button>
-        </div>
-      </>
-    );
-  } else if (gameOver && !scoreState && userId) {
-    return (
-      <div css={gameOverMenuStyles(gameOver)}>
-        <div>GAME OVER</div>
-        <div>SCORE: {score} </div>
-
-        <label>
-          ENTER NAME:
-          <input
-            value={alias}
-            type="text"
-            maxLength="3"
-            onChange={(event) => {
-              setAlias(event.currentTarget.value);
-            }}
-          />
-        </label>
-
-        <button onClick={() => handleSaveScore()}>SAVE SCORE</button>
-        {errors.map((error) => (
-          <span key={`error${error.message}`}>{error.message}</span>
-        ))}
-      </div>
-    );
-  } else if (gameOver && !scoreState && !userId) {
-    return (
-      <div css={gameOverMenuStyles(gameOver)}>
-        <div>GAME OVER</div>
-        <div>SCORE: {score} </div>
-        <div>HIGH SCORES</div>
-        <div>
-          {allScores.map((globalScore) => {
-            return (
-              <div
-                key={`global-${globalScore.alias}-${globalScore.score}-${
-                  Math.random() * 1000
-                }`}
-              >
-                <div>
-                  {globalScore.alias}...
-                  {globalScore.score}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-
-        <button onClick={handleRestart}>PLAY AGAIN?</button>
-      </div>
-    );
-  } else {
-    return (
-      <div css={highscoreMenuStyles(scoreState, highscoreState)}>
-        <div>HIGH SCORES</div>
-        {highscoreGlobalScoresButton ? (
-          <div>
-            TOP 10 GLOBAL SCORES
-            {updatedGlobalScores.map((globalScore) => {
-              return (
-                <div
-                  key={`global-${globalScore.alias}-${globalScore.score}-${
-                    Math.random() * 1000
-                  }`}
-                >
-                  <div>{globalScore.alias}</div>
-                  <div>{globalScore.score}</div>
-                  <div>{allScores.indexOf(globalScore) + 1}</div>
-                </div>
-              );
-            })}
-          </div>
-        ) : (
-          <div>
-            TOP 10 PERSONAL SCORES
-            {updatedPersonalScores.map((personalScore) => {
-              return (
-                <div
-                  key={`personal-${personalScore.alias}-${
-                    personalScore.score
-                  }-${Math.random() * 1000}`}
-                >
-                  <div>{personalScore.alias}</div>
-                  <div>{personalScore.score}</div>
-                  <div>{updatedPersonalScores.indexOf(personalScore) + 1}</div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        <button onClick={handleHighscoreToggleButton}>
-          {highscoreGlobalScoresButton
-            ? 'SHOW PERSONAL SCORES'
-            : 'SHOW GLOBAL SCORES'}
-        </button>
-        <br />
-
-        <button onClick={handleRestart}>PLAY AGAIN?</button>
-      </div>
-    );
-  }
-}
-
-export default function GamePage(props) {
   const [score, setScore] = useState(0);
-  const [pauseTime, setPauseTime] = useState(0);
-
+  const [alias, setAlias] = useState();
+  const [errors, setErrors] = useState([]);
+  const [highscoreGlobalScoresButton, setHighscoreGlobalScoresButton] =
+    useState(true);
+  const [highscoreButton, setHighscoreButton] = useState(false);
   const [ingredientCounters, setIngredientCounters] = useState([
-    {
-      id: 'bananas',
-      amount: 2,
-      spoiled: false,
-    },
     {
       id: 'strawberries',
       amount: 3,
+      spoiled: false,
+    },
+    {
+      id: 'bananas',
+      amount: 2,
       spoiled: false,
     },
     {
@@ -471,11 +326,11 @@ export default function GamePage(props) {
   ]);
   const [containerCounters, setContainerCounters] = useState([
     {
-      id: 'bananas',
+      id: 'strawberries',
       stock: 12,
     },
     {
-      id: 'strawberries',
+      id: 'bananas',
       stock: 12,
     },
     {
@@ -534,18 +389,100 @@ export default function GamePage(props) {
       ).spoiled,
     };
   });
+  const [rulesButton, setRulesButton] = useState(false);
+  const [doorButtonState, setDoorButtonState] = useState(false);
+  const [updatedGlobalScores, setUpdatedGlobalScores] = useState(
+    props.allScores,
+  );
+  const [updatedPersonalScores, setUpdatedPersonalScores] = useState(
+    props.personalScores,
+  );
+
+  async function handleSaveScore() {
+    scoreState = true;
+    if (props.userId) {
+      const saveScoreResponse = await fetch('/api/scores', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          alias: alias,
+          score: score,
+          userId: props.userId,
+        }),
+      });
+
+      const saveScoreResponseBody = await saveScoreResponse.json();
+
+      if ('errors' in saveScoreResponseBody) {
+        setErrors(saveScoreResponseBody.errors);
+        return;
+      }
+      const finalUpdatedGlobalScores = updatedGlobalScores;
+      if (
+        saveScoreResponseBody.newScore.score > finalUpdatedGlobalScores[9].score
+      ) {
+        finalUpdatedGlobalScores.pop();
+        finalUpdatedGlobalScores.push(saveScoreResponseBody.newScore);
+        finalUpdatedGlobalScores.sort((a, b) => {
+          return b.score - a.score;
+        });
+
+        setUpdatedGlobalScores(finalUpdatedGlobalScores);
+      }
+
+      const finalUpdatedPersonalScores = updatedPersonalScores;
+      if (finalUpdatedPersonalScores.length > 9) {
+        if (
+          saveScoreResponseBody.newScore.score >
+          finalUpdatedPersonalScores[9].score
+        ) {
+          finalUpdatedPersonalScores.pop();
+          finalUpdatedPersonalScores.push(saveScoreResponseBody.newScore);
+
+          finalUpdatedPersonalScores.sort((a, b) => {
+            return b.score - a.score;
+          });
+          setUpdatedPersonalScores(finalUpdatedPersonalScores);
+        }
+      }
+    }
+  }
 
   // FUNCTIONS
+
+  function handleRestart() {
+    // page.reload
+    router.reload(window.location.pathname);
+  }
+
+  function handleShowHighscores() {
+    setHighscoreButton(!highscoreButton);
+    setRulesButton(false);
+  }
+  function handleBackupDoor() {
+    setDoorButtonState(!doorButtonState);
+  }
+
+  function handleHighscoreToggleButton() {
+    setHighscoreGlobalScoresButton(!highscoreGlobalScoresButton);
+  }
+  function handleRulesToggleButton() {
+    setRulesButton(!rulesButton);
+    setHighscoreButton(false);
+  }
+  function play() {
+    setStartTime(performance.now() - pauseTime);
+    setPauseTime(undefined);
+    setRulesButton(false);
+    setHighscoreButton(false);
+  }
+
   let timerId;
   function pause() {
     setPauseTime(displayTime);
     clearInterval(timerId);
-  }
-
-  let openBackup = false;
-
-  function handleOpenBackup() {
-    openBackup = true;
   }
 
   const makeDragQueenTrue = useCallback(() => {
@@ -599,6 +536,7 @@ export default function GamePage(props) {
 
   function endGame() {
     gameOver = true;
+    setPauseTime(displayTime);
   }
 
   const spoilFood = useCallback(() => {
@@ -694,107 +632,159 @@ export default function GamePage(props) {
       <div>
         <div css={wrapperStyles}>
           <div>Score: {score}</div>
-          <button onClick={pause}>PAUSE</button>
+          <button css={pauseButtonStyles} onClick={pause} />
           <div css={ingredientsStyles}>
-            {/* the ingredients */}
-            {ingredientInfo.map((ingredient) => (
-              <button
-                key={`ingredient-${ingredient.id}`}
-                css={ingredientButtonStyles(ingredient)}
-                onClick={() => {
-                  setIngredientCounters(
-                    ingredientCounters.map((oldIngredient) => {
-                      // check if this is the one i'm clicking
-                      if (ingredient.id === oldIngredient.id) {
-                        if (oldIngredient.spoiled && !flies.state) {
+            {/* the drag queens */}
+            {dragQueens.map((dragQueen) => (
+              <div
+                // move this to button later
+                key={`dragQueen-${dragQueen.id}`}
+              >
+                <button
+                  css={dragQueenStyles(dragQueen)}
+                  onMouseDown={() => {
+                    if (
+                      ingredientCounters.every(
+                        (ingredient) => ingredient.amount === 0,
+                      )
+                    ) {
+                      setDragQueens(
+                        dragQueens.map((clickedDragQueen) => {
+                          // check if this is the one i'm clicking
+                          if (dragQueen.id === clickedDragQueen.id) {
+                            // check if the one i'm clicking is true
+                            if (dragQueen.state) {
+                              return {
+                                ...clickedDragQueen,
+                                state: false,
+                                position: Math.floor(
+                                  Math.random() * (600 - 200 + 1) + 200,
+                                ),
+                                enterTime: 0,
+                                patienceMeter: 0,
+                              };
+                            } else {
+                              return { ...clickedDragQueen };
+                            }
+                          } else {
+                            return { ...clickedDragQueen };
+                          }
+                        }),
+                      );
+                      setIngredientCounters(
+                        ingredientCounters.map((ingredient) => {
                           return {
                             ...ingredient,
-                            spoiled: false,
+                            amount: Math.floor(Math.random() * 4 + 1),
                           };
-                        }
-                        // check if the one i'm clicking has an amount of 0
-                        else if (
-                          ingredient.amount > 0 &&
-                          ingredient.stock > 0 &&
-                          !ingredient.spoiled
-                        ) {
-                          return {
-                            ...oldIngredient,
-                            amount: oldIngredient.amount - 1,
-                          };
-                        } else if (
-                          ingredient.amount > 0 &&
-                          ingredient.stock === 0
-                        ) {
-                          return { ...oldIngredient };
-                        } else if (
-                          ingredient.amount === 0 &&
-                          ingredient.stock > 0
-                        ) {
-                          // reduce score by 5
-                          if (score !== 0) {
-                            setScore(score - 5);
+                        }),
+                      );
+                      setScore(score + 10);
+                    }
+                  }}
+                >
+                  {dragQueen.id}
+                </button>
+              </div>
+            ))}{' '}
+            {/* the ingredients */}
+            <div css={ingredientButtonParentStyles}>
+              {ingredientInfo.map((ingredient) => (
+                <button
+                  key={`ingredient-${ingredient.id}`}
+                  css={ingredientButtonStyles(ingredient)}
+                  onClick={() => {
+                    setIngredientCounters(
+                      ingredientCounters.map((oldIngredient) => {
+                        // check if this is the one i'm clicking
+                        if (ingredient.id === oldIngredient.id) {
+                          if (oldIngredient.spoiled && !flies.state) {
+                            return {
+                              ...ingredient,
+                              spoiled: false,
+                            };
+                          }
+                          // check if the one i'm clicking has an amount of 0
+                          else if (
+                            ingredient.amount > 0 &&
+                            ingredient.stock > 0 &&
+                            !ingredient.spoiled
+                          ) {
+                            return {
+                              ...oldIngredient,
+                              amount: oldIngredient.amount - 1,
+                            };
+                          } else if (
+                            ingredient.amount > 0 &&
+                            ingredient.stock === 0
+                          ) {
                             return { ...oldIngredient };
+                          } else if (
+                            ingredient.amount === 0 &&
+                            ingredient.stock > 0
+                          ) {
+                            // reduce score by 5
+                            if (score !== 0) {
+                              setScore(score - 5);
+                              return { ...oldIngredient };
+                            } else {
+                              setScore(0);
+                              return { ...oldIngredient };
+                            }
                           } else {
-                            setScore(0);
-                            return { ...oldIngredient };
+                            return {
+                              ...oldIngredient,
+                            };
                           }
                         } else {
-                          return {
-                            ...oldIngredient,
-                          };
+                          return { ...oldIngredient };
                         }
-                      } else {
-                        return { ...oldIngredient };
-                      }
-                    }),
-                  );
-                  setContainerCounters(
-                    containerCounters.map((container) => {
-                      // check if this is the one i'm clicking
-                      if (ingredient.id === container.id) {
-                        if (ingredient.spoiled && !flies.state) {
-                          return {
-                            ...container,
-                            stock: 0,
-                          };
-                        }
-                        // check if the one i'm clicking has an amount of 0
-                        else if (container.stock > 0 && !ingredient.spoiled) {
-                          return {
-                            ...container,
-                            stock: container.stock - 1,
-                          };
+                      }),
+                    );
+                    setContainerCounters(
+                      containerCounters.map((container) => {
+                        // check if this is the one i'm clicking
+                        if (ingredient.id === container.id) {
+                          if (ingredient.spoiled && !flies.state) {
+                            return {
+                              ...container,
+                              stock: 0,
+                            };
+                          }
+                          // check if the one i'm clicking has an amount of 0
+                          else if (container.stock > 0 && !ingredient.spoiled) {
+                            return {
+                              ...container,
+                              stock: container.stock - 1,
+                            };
+                          } else {
+                            return { ...container };
+                          }
                         } else {
                           return { ...container };
                         }
-                      } else {
-                        return { ...container };
-                      }
-                    }),
-                  );
-                }}
-              >
-                {ingredientInfo.map((singleIngredientInfo) => {
-                  if (ingredient.id === singleIngredientInfo.id) {
-                    return (
-                      <>
-                        <span>{singleIngredientInfo.id}</span>
-                        <br />
-                        <span>amount: {singleIngredientInfo.amount}</span>
-                        <br />
-                        {/* for some reason this isn't showing */}
-                        <span>spoiled: {singleIngredientInfo.spoiled}</span>
-                      </>
+                      }),
                     );
-                  }
-                })}
-              </button>
-            ))}
+                  }}
+                >
+                  {ingredientInfo.map((singleIngredientInfo) => {
+                    if (ingredient.id === singleIngredientInfo.id) {
+                      return (
+                        <>
+                          <span>{singleIngredientInfo.id}</span>
+                          <br />
+                          <span>amount: {singleIngredientInfo.amount}</span>
+                          <br />
+                          {/* for some reason this isn't showing */}
+                        </>
+                      );
+                    }
+                  })}
+                </button>
+              ))}
+            </div>
           </div>
-          <div css={backupButtonStyles(openBackup)}>
-            <button onClick={handleOpenBackup}>BACKUP</button>
-          </div>
+
           <div css={containerIngredientsStyles}>
             {/* THE BACKUP INGREDIENTS */}
             {ingredientInfo.map((ingredient) => (
@@ -836,10 +826,12 @@ export default function GamePage(props) {
               </button>
             ))}
           </div>
-          <div css={fliesStyles(flies)}>THE FLIES</div>
+          <div css={fliesStyles(flies)} />
           <div css={flySwatterStyles}>
-            <button
-              css={flySwatterStyles}
+            <Image
+              src="/flyswatter.png"
+              width="100"
+              height="210"
               onClick={() => {
                 setFlies({
                   state: false,
@@ -847,25 +839,282 @@ export default function GamePage(props) {
                   ingredientPosition: 0,
                 });
               }}
-            >
-              FLY SWATTER
-            </button>
+            />
           </div>
-          <Image src="/background.png" width="640" height="380" />
+          <div css={blenderStyles}>
+            <Image src="/blender.png" width="145" height="300" />
+          </div>
+          <div onClick={handleBackupDoor} css={doorStyles(doorButtonState)}>
+            OPEN
+          </div>
+
+          <Image src="/table.png" width="640" height="380" />
         </div>
-        <div>
-          {Timer(
-            score,
-            props.username,
-            props.userId,
-            props.allScores,
-            props.personalScores,
-            pauseTime,
-            setPauseTime,
-            pause,
-          )}
-        </div>
-        {/* the drag queens */}
+        {!gameOver && paused && displayTime > 0 ? (
+          <div css={pauseMenuStyles}>
+            PAUSE MENU
+            <button onClick={handleRulesToggleButton}>RULES</button>
+            <button onClick={handleShowHighscores}>HIGH SCORES</button>
+            <button onClick={play}>Resume</button>
+            <button onClick={handleRestart}>START OVER</button>
+            {rulesButton ? <div>THE RULES</div> : <div />}
+            {highscoreButton ? (
+              <div>
+                <div>HIGH SCORES</div>
+                {highscoreGlobalScoresButton ? (
+                  <div css={highscoreGridStyles}>
+                    TOP 10 GLOBAL SCORES
+                    {updatedGlobalScores.map((globalScore) => {
+                      return (
+                        <div
+                          key={`global-${globalScore.alias}-${
+                            globalScore.score
+                          }-${Math.random() * 1000}`}
+                        >
+                          <div>{globalScore.alias}</div>
+                          <div>{globalScore.score}</div>
+                          <div>{props.allScores.indexOf(globalScore) + 1}</div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <div css={highscoreGridStyles}>
+                    TOP 10 PERSONAL SCORES
+                    {updatedPersonalScores.map((personalScore) => {
+                      return (
+                        <div
+                          key={`personal-${personalScore.alias}-${
+                            personalScore.score
+                          }-${Math.random() * 1000}`}
+                        >
+                          <div>{personalScore.alias}</div>
+                          <div>{personalScore.score}</div>
+                          <div>
+                            {updatedPersonalScores.indexOf(personalScore) + 1}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
+                )}
+                {props.userId ? (
+                  <button onClick={handleHighscoreToggleButton}>
+                    {highscoreGlobalScoresButton
+                      ? 'SHOW PERSONAL SCORES'
+                      : 'SHOW GLOBAL SCORES'}
+                  </button>
+                ) : (
+                  <div />
+                )}
+              </div>
+            ) : (
+              <div />
+            )}
+          </div>
+        ) : (
+          <div />
+        )}
+        {!gameOver && paused && displayTime === 0 ? (
+          <div>
+            <div css={startMenuStyles}>
+              START MENU
+              <button onClick={handleRulesToggleButton}>RULES</button>
+              <button onClick={handleShowHighscores}>HIGH SCORES</button>
+              <button onClick={play}>START</button>
+              {rulesButton ? <div>THE RULES</div> : <div />}
+              {highscoreButton ? (
+                <div>
+                  <div>HIGH SCORES</div>
+                  {highscoreGlobalScoresButton ? (
+                    <div css={highscoreGridStyles}>
+                      TOP 10 GLOBAL SCORES
+                      <div>
+                        <div>NAME</div>
+                        <div>SCORE</div>
+                        <div>RANK</div>
+                      </div>
+                      {updatedGlobalScores.map((globalScore) => {
+                        return (
+                          <div
+                            key={`global-${globalScore.alias}-${
+                              globalScore.score
+                            }-${Math.random() * 1000}`}
+                          >
+                            <div>{globalScore.alias}</div>
+                            <div>{globalScore.score}</div>
+                            <div>
+                              {props.allScores.indexOf(globalScore) + 1}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div css={highscoreGridStyles}>
+                      TOP 10 PERSONAL SCORES
+                      {updatedPersonalScores.map((personalScore) => {
+                        return (
+                          <div
+                            key={`personal-${personalScore.alias}-${
+                              personalScore.score
+                            }-${Math.random() * 1000}`}
+                          >
+                            <div>{personalScore.alias}</div>
+                            <div>{personalScore.score}</div>
+                            <div>
+                              {updatedPersonalScores.indexOf(personalScore) + 1}
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  )}
+                  {props.userId ? (
+                    <div>
+                      <button onClick={handleHighscoreToggleButton}>
+                        {highscoreGlobalScoresButton
+                          ? 'SHOW PERSONAL SCORES'
+                          : 'SHOW GLOBAL SCORES'}
+                      </button>
+                    </div>
+                  ) : (
+                    <div />
+                  )}
+                </div>
+              ) : (
+                <div />
+              )}
+              <div>
+                {props.userId ? (
+                  <div>
+                    <span>{props.username}</span>
+
+                    <Link href="/logout">logout</Link>
+                  </div>
+                ) : (
+                  <div />
+                )}
+              </div>
+            </div>
+          </div>
+        ) : (
+          <div />
+        )}
+        {gameOver && !scoreState && props.userId ? (
+          <div>
+            <div css={gameOverMenuStyles}>
+              <div>GAME OVER</div>
+              <div>SCORE: {score} </div>
+
+              <label>
+                ENTER NAME:
+                <input
+                  value={alias}
+                  type="text"
+                  maxLength="3"
+                  onChange={(event) => {
+                    setAlias(event.currentTarget.value);
+                  }}
+                />
+              </label>
+
+              <button onClick={() => handleSaveScore()}>SAVE SCORE</button>
+
+              {errors.map((error) => (
+                <span key={`error${error.message}`}>{error.message}</span>
+              ))}
+              <button onClick={handleRestart}>RESTART</button>
+            </div>
+          </div>
+        ) : (
+          <div />
+        )}
+        {!scoreState && !props.userId ? (
+          <div>
+            <div css={gameOverMenuStyles}>
+              <div>GAME OVER</div>
+              <div>SCORE: {score} </div>
+              <div>HIGH SCORES</div>
+              <div css={highscoreGridStyles}>
+                {props.allScores.map((globalScore) => {
+                  return (
+                    <div
+                      key={`global-${globalScore.alias}-${globalScore.score}-${
+                        Math.random() * 1000
+                      }`}
+                    >
+                      <div>{globalScore.alias}</div>
+                      <div>{globalScore.score}</div>
+                      <div>{props.allScores.indexOf(globalScore) + 1}</div>
+                    </div>
+                  );
+                })}
+              </div>
+
+              <button onClick={handleRestart}>PLAY AGAIN?</button>
+            </div>
+          </div>
+        ) : (
+          <div />
+        )}
+        {scoreState ? (
+          <div>
+            <div css={highscoreMenuStyles}>
+              <div>HIGH SCORES</div>
+              {highscoreGlobalScoresButton ? (
+                <div css={highscoreGridStyles}>
+                  TOP 10 GLOBAL SCORES
+                  {updatedGlobalScores.map((globalScore) => {
+                    return (
+                      <div
+                        key={`global-${globalScore.alias}-${
+                          globalScore.score
+                        }-${Math.random() * 1000}`}
+                      >
+                        <div>{globalScore.alias}</div>
+                        <div>{globalScore.score}</div>
+                        <div>{props.allScores.indexOf(globalScore) + 1}</div>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div css={highscoreGridStyles}>
+                  TOP 10 PERSONAL SCORES
+                  {updatedPersonalScores.map((personalScore) => {
+                    return (
+                      <div
+                        key={`personal-${personalScore.alias}-${
+                          personalScore.score
+                        }-${Math.random() * 1000}`}
+                      >
+                        <div>{personalScore.alias}</div>
+                        <div>{personalScore.score}</div>
+                        <div>
+                          {updatedPersonalScores.indexOf(personalScore) + 1}
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              <button onClick={handleHighscoreToggleButton}>
+                {highscoreGlobalScoresButton
+                  ? 'SHOW PERSONAL SCORES'
+                  : 'SHOW GLOBAL SCORES'}
+              </button>
+              <br />
+
+              <button onClick={handleRestart}>PLAY AGAIN?</button>
+            </div>
+          </div>
+        ) : (
+          <div />
+        )}
+      </div>
+      <div>
         {dragQueens.map((dragQueen) => (
           <div
             // move this to button later
@@ -875,54 +1124,10 @@ export default function GamePage(props) {
               DragQueen: {dragQueen.id} Anger: {dragQueen.patienceMeter} Time to
               get angrier: {(dragQueen.enterTime + 6000) / 1000}
             </div>
-            <button
-              css={dragQueenStyles(dragQueen)}
-              onMouseDown={() => {
-                if (
-                  ingredientCounters.every(
-                    (ingredient) => ingredient.amount === 0,
-                  )
-                ) {
-                  setDragQueens(
-                    dragQueens.map((clickedDragQueen) => {
-                      // check if this is the one i'm clicking
-                      if (dragQueen.id === clickedDragQueen.id) {
-                        // check if the one i'm clicking is true
-                        if (dragQueen.state) {
-                          return {
-                            ...clickedDragQueen,
-                            state: false,
-                            position: Math.floor(
-                              Math.random() * (600 - 200 + 1) + 200,
-                            ),
-                            enterTime: 0,
-                            patienceMeter: 0,
-                          };
-                        } else {
-                          return { ...clickedDragQueen };
-                        }
-                      } else {
-                        return { ...clickedDragQueen };
-                      }
-                    }),
-                  );
-                  setIngredientCounters(
-                    ingredientCounters.map((ingredient) => {
-                      return {
-                        ...ingredient,
-                        amount: Math.floor(Math.random() * 4 + 1),
-                      };
-                    }),
-                  );
-                  setScore(score + 10);
-                }
-              }}
-            >
-              {dragQueen.id}
-            </button>
           </div>
         ))}
       </div>
+      <div>{formatTimer(displayTime)}</div>
     </div>
   );
 }

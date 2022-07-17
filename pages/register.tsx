@@ -1,5 +1,6 @@
 import { css } from '@emotion/react';
 import Head from 'next/head';
+import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
@@ -10,38 +11,58 @@ const registerLoginStyles = css`
   display: flex;
   flex-direction: column;
   gap: 10px;
-  z-index: 2;
-  background-color: pink;
-  max-width: 640px;
-  min-height: 250px;
+  width: 640px;
+  height: 380px;
   align-content: center;
   justify-content: center;
-  opacity: 0.8;
   position: absolute;
-  margin: 5%;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 
-  > div > a {
-    color: black;
+  > div {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    display: flex;
+  }
+  > a {
+    top: 10%;
+    left: 10%;
+    transform: translate(-50%, -50%);
+    box-shadow: 4px 4px;
+    position: absolute;
+    text-decoration: none;
+    text-decoration-color: none;
     padding: 10px;
-    font-weight: bold;
     border: 1px solid black;
     border-radius: 10px;
-    width: 40px;
-    transition: all 0.2s linear 0s;
-    box-shadow: 4px 4px;
-    background-color: #efefef;
-    position: absolute;
-    z-index: 2;
-    text-decoration: none;
-    top: 10px;
-    :hover {
-      box-shadow: 0 0.5em 0.5em -0.4em var(--hover);
-      transform: translateY(0.25em);
-      transition: 0.3s;
-    }
+    font-weight: bold;
+    background-color: #f1f1f1;
+    color: black;
+    align-self: center;
+    width: 80px;
+    text-align: center;
+    text-justify: center;
   }
-  > div > button {
-    width: 70px;
+  > button {
+    position: absolute;
+    top: 80%;
+    text-decoration: none;
+    text-decoration-color: none;
+    padding: 10px;
+    border: 1px solid black;
+    border-radius: 10px;
+    font-weight: bold;
+    background-color: #f1f1f1;
+    color: black;
+    align-self: center;
+    width: 80px;
+    text-align: center;
+    text-justify: center;
+    box-shadow: 4px 4px;
+    cursor: pointer;
   }
 `;
 
@@ -108,9 +129,9 @@ export default function Register(props: Props) {
 
       <main />
       <div css={registerLoginStyles}>
-        <div>
-          <Link href="/">Back</Link>
-        </div>
+        <Image src="/background.png" width="640" height="380" />
+
+        <Link href="/">Back</Link>
         <div>
           <label>
             username:
@@ -130,13 +151,13 @@ export default function Register(props: Props) {
               }}
             />
           </label>
-          <button onClick={() => registerHandler()}>Register</button>
           <br />
 
           {errors.map((error) => (
             <span key={`error${error.message}`}>{error.message}</span>
           ))}
         </div>
+        <button onClick={() => registerHandler()}>Register</button>
       </div>
     </div>
   );
