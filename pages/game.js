@@ -21,7 +21,7 @@ const wrapperStyles = css`
 
   > div {
     position: absolute;
-    z-index: 100;
+    /* z-index: 100; */
   }
   > button {
     position: absolute;
@@ -39,19 +39,26 @@ const ingredientsStyles = css`
   grid-template-rows: 50px 50px;
   column-gap: 10px;
   row-gap: 15px;
+  /* z-index: 101; */
+
+  /* > div > button {
+    z-index: -10000;
+  } */
 `;
 
 const fliesStyles = (flies) => css`
   position: absolute;
-  height: 110px;
-  width: 220px;
-  bottom: 10.5%;
-  left: ${flies.state ? '5%' : '100%'};
-  z-index: ${flies.state ? '100' : '-100'};
+  height: 260px;
+  width: 460px;
+  bottom: 0%;
+  right: ${flies.state ? '40%' : '80%'};
+  z-index: ${flies.state ? '103' : '-100'};
   transition: 3000ms;
   transition-timing-function: ease-out;
-  background-image: url('flies-sprite2.png');
+  background-image: url('sprite-flies.png');
+  transform: scale(0.4);
   animation: fly 0.5s steps(3) infinite;
+  pointer-events: none;
 
   @keyframes fly {
     0% {
@@ -59,7 +66,7 @@ const fliesStyles = (flies) => css`
     }
 
     100% {
-      background-position: 0 -330px;
+      background-position: 0 -780px;
     }
   }
 `;
@@ -67,17 +74,35 @@ const fliesStyles = (flies) => css`
 const flySwatterStyles = css`
   position: absolute;
   bottom: 10%;
-  left: 60%;
+  left: 65%;
   height: 80px;
   width: 40px;
   cursor: pointer;
+  z-index: 102;
+  transform: rotate(30deg);
+
+  :focus {
+    animation: swat cubic-bezier(0, 1.01, 1, 1) 1s 1;
+  }
+  :active {
+    animation: none;
+  }
+  @keyframes swat {
+    50% {
+      transform: translateX(-300px) rotate(-50deg);
+    }
+    100% {
+      transform: translateX(0px) rotate(30deg);
+    }
+  }
 `;
 const blenderStyles = css`
   position: absolute;
-  bottom: 10%;
+  bottom: 7%;
   left: 45%;
   height: 130px;
   width: 55px;
+  z-index: 101;
 `;
 
 const doorStyles = (doorButtonState) => css`
@@ -90,7 +115,7 @@ const doorStyles = (doorButtonState) => css`
   padding: 0;
   background: none;
   border: none;
-  /* transform: translate(-50%, -50%); */
+  z-index: 101;
 
   background-image: url(${doorButtonState
     ? 'door_open.png'
@@ -207,11 +232,13 @@ const ingredientButtonStyles = (ingredient) => css`
   border: none;
   padding: 0;
   background: none;
-  background-color: ${ingredient.spoiled ? 'green' : 'none'};
+  background-color: none;
   height: 100px;
   width: 200px;
   transform: scale(0.5);
-  background-image: url('/${ingredient.id}/${ingredient.id}-${ingredient.stock}.png');
+  background-image: url(${ingredient.spoiled ? `greensmoke.png` : `/`}),
+    url('/${ingredient.id}/${ingredient.id}-${ingredient.stock}.png');
+  z-index: 101;
 `;
 
 const ingredientButtonParentStyles = css`
@@ -224,11 +251,35 @@ const ingredientButtonParentStyles = css`
   right: 13%;
   bottom: 12.5%;
 `;
+
+const numberLabelStyles = css`
+  border: 1px solid black;
+  font-size: 25px;
+  padding: 0;
+  background: none;
+  background-color: none;
+  height: 30px;
+  width: 30px;
+  z-index: 101;
+`;
+
+const numberLabelParentStyles = css`
+  display: grid;
+  grid-template-columns: 30px 30px;
+  grid-template-rows: 30px 30px;
+  column-gap: 120px;
+  row-gap: 80px;
+  position: absolute;
+  right: 13%;
+  bottom: 12.5%;
+`;
+
 const containerButtonStyles = css`
   height: 35px;
   width: 35px;
   background: none;
   font-size: 5px;
+  z-index: 101;
 `;
 const containerButtonParentStyles = css`
   display: grid;
@@ -240,12 +291,12 @@ const containerButtonParentStyles = css`
   /* transform: translate(-50%, -50%); */
   left: 77%;
   bottom: 10%;
+  z-index: 101;
 `;
 
 // TODOS:
 
 // - figure out how to make sprite work with patienceMeter
-// - create array of coordinates for each ingredientPosition
 // - create a readme file
 
 // list state up of paused
@@ -448,6 +499,12 @@ export default function GamePage(props) {
           });
           setUpdatedPersonalScores(finalUpdatedPersonalScores);
         }
+      } else {
+        finalUpdatedPersonalScores.push(saveScoreResponseBody.newScore);
+        finalUpdatedPersonalScores.sort((a, b) => {
+          return b.score - a.score;
+        });
+        setUpdatedPersonalScores(finalUpdatedPersonalScores);
       }
     }
   }
@@ -772,13 +829,11 @@ export default function GamePage(props) {
                   {ingredientInfo.map((singleIngredientInfo) => {
                     if (ingredient.id === singleIngredientInfo.id) {
                       return (
-                        <>
-                          <span>{singleIngredientInfo.id}</span>
-                          <br />
-                          <span>amount: {singleIngredientInfo.amount}</span>
-                          <br />
-                          {/* for some reason this isn't showing */}
-                        </>
+                        <div css={numberLabelParentStyles}>
+                          <p css={numberLabelStyles}>
+                            {singleIngredientInfo.amount}
+                          </p>
+                        </div>
                       );
                     }
                   })}
@@ -839,7 +894,7 @@ export default function GamePage(props) {
           )}
 
           <div css={fliesStyles(flies)} />
-          <div css={flySwatterStyles}>
+          <div tabIndex="0" css={flySwatterStyles}>
             <Image
               src="/flyswatter.png"
               width="100"
@@ -1130,8 +1185,7 @@ export default function GamePage(props) {
             key={`dragQueen-${dragQueen.id}`}
           >
             <div>
-              DragQueen: {dragQueen.id} Anger: {dragQueen.patienceMeter} Time to
-              get angrier: {(dragQueen.enterTime + 6000) / 1000}
+              DragQueen: {dragQueen.id} Anger: {dragQueen.patienceMeter}
             </div>
           </div>
         ))}

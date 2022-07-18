@@ -15,6 +15,19 @@ const gameScreenStyles = css`
   transform: translate(-50%, -50%);
   z-index: -1000;
 `;
+const borderStyles = css`
+  border-left: 200px solid white;
+  border-right: 200px solid white;
+  margin: 0 auto;
+  top: 50%;
+  left: 50%;
+  position: absolute;
+  width: 650px;
+  height: 390px;
+  transform: translate(-50%, -50%);
+  z-index: 100000000000000;
+  pointer-events: none;
+`;
 
 const startPageLinkStyles = css`
   position: absolute;
@@ -82,6 +95,9 @@ function App({ Component, pageProps }) {
       {[[], false, null, undefined]}
       <Layout user={user}>
         <Component {...pageProps} refreshUserProfile={refreshUserProfile} />
+        <div css={borderStyles}>
+          <Image src="/border.png" width="650" height="390" />
+        </div>
         <div css={gameScreenStyles}>
           {' '}
           <Image src="/background.png" width="640" height="380" />
