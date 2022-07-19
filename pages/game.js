@@ -79,7 +79,7 @@ const flySwatterStyles = css`
   width: 40px;
   cursor: pointer;
   z-index: 102;
-  transform: rotate(30deg);
+  /* transform: rotate(50deg); */
 
   :focus {
     animation: swat cubic-bezier(0, 1.01, 1, 1) 1s 1;
@@ -104,22 +104,23 @@ const blenderStyles = css`
   width: 55px;
   z-index: 101;
 `;
+const tableStyles = css`
+  pointer-events: none;
+`;
 
 const doorStyles = (doorButtonState) => css`
   position: absolute;
-  width: 255px;
-  height: ${doorButtonState ? '300px' : '160px'};
+  width: ${doorButtonState ? '190px' : '173px'};
+  height: ${doorButtonState ? '270px' : '158px'};
   transform: scale(0.5);
-  top: ${doorButtonState ? '33%' : '60%'};
-  left: 65%;
+  top: ${doorButtonState ? '39%' : '60%'};
+  left: ${doorButtonState ? '68%' : '70%'};
   padding: 0;
   background: none;
   border: none;
   z-index: 101;
 
-  background-image: url(${doorButtonState
-    ? 'door_open.png'
-    : 'door_closed.png'});
+  background-image: url(${doorButtonState ? 'box_open.png' : 'box_closed.png'});
 `;
 
 const pauseButtonStyles = css`
@@ -136,18 +137,33 @@ const pauseButtonStyles = css`
   transform: scale(0.3);
 `;
 
+const playButtonStyles = css`
+  width: 0;
+  height: 74px;
+  border-style: solid;
+  background: transparent;
+  box-sizing: border-box;
+  cursor: pointer;
+  transition: 100ms all ease;
+  border-width: 37px 0px 37px 74px;
+  border-color: transparent transparent transparent #aa336a;
+  transform: scale(0.3);
+`;
+
 const pauseMenuStyles = css`
   width: 620px;
-  height: 360px;
-  top: 50%;
+  /* border: white 3px solid; */
+  height: 300px;
+  top: 53%;
   left: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
   background-color: #0042ff;
-  /* opacity: 90%; */
+  /* opacity: 50%; */
   color: white;
   text-align: center;
   text-justify: center;
+  border-radius: 20px;
 `;
 const startMenuStyles = css`
   width: 620px;
@@ -170,7 +186,7 @@ const gameOverMenuStyles = css`
   left: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
-  background-color: #0042ff;
+  background-color: red;
   /* opacity: 90%; */
   color: white;
   text-align: center;
@@ -211,18 +227,20 @@ const highscoreGridStyles = css`
 `;
 
 const dragQueenStyles = (dragQueen) => css`
-  border: 1px solid black;
-  border-radius: 50%;
-  height: 200px;
-  width: 100px;
-  text-align: center;
+  border: none;
+  padding: 0;
+  background: none;
+  background-color: none;
+  height: 578px;
+  width: 427px;
   position: absolute;
-  top: 10%;
-  right: 100%;
-  transform: translate(-50%, -50%)
-    translateX(${dragQueen.state ? `${dragQueen.position}px` : '765px'});
-  transition: 3000ms;
+  top: -60%;
+  right: ${dragQueen.position}px;
+  transform: translate(-50%, -50%) translateX(765px)
+    translateY(${dragQueen.state ? '0px' : '200px'}) scale(0.5);
+  transition: transform 3000ms;
   transition-timing-function: linear;
+  background-image: url('/dragQueens/${dragQueen.id}/${dragQueen.id}-${dragQueen.patienceMeter}.png');
   :hover {
     cursor: pointer;
   }
@@ -230,7 +248,6 @@ const dragQueenStyles = (dragQueen) => css`
 
 const ingredientButtonStyles = (ingredient) => css`
   border: none;
-  padding: 0;
   background: none;
   background-color: none;
   height: 100px;
@@ -239,6 +256,7 @@ const ingredientButtonStyles = (ingredient) => css`
   background-image: url(${ingredient.spoiled ? `greensmoke.png` : `/`}),
     url('/${ingredient.id}/${ingredient.id}-${ingredient.stock}.png');
   z-index: 101;
+  cursor: pointer;
 `;
 
 const ingredientButtonParentStyles = css`
@@ -253,7 +271,7 @@ const ingredientButtonParentStyles = css`
 `;
 
 const numberLabelStyles = css`
-  border: 1px solid black;
+  border: none;
   font-size: 25px;
   padding: 0;
   background: none;
@@ -278,8 +296,10 @@ const containerButtonStyles = css`
   height: 35px;
   width: 35px;
   background: none;
+  border: none;
   font-size: 5px;
   z-index: 101;
+  cursor: pointer;
 `;
 const containerButtonParentStyles = css`
   display: grid;
@@ -296,7 +316,6 @@ const containerButtonParentStyles = css`
 
 // TODOS:
 
-// - figure out how to make sprite work with patienceMeter
 // - create a readme file
 
 // list state up of paused
@@ -399,28 +418,28 @@ export default function GamePage(props) {
     {
       id: 1,
       state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
+      position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
       enterTime: 0,
       patienceMeter: 0,
     },
     {
       id: 2,
       state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
+      position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
       enterTime: 0,
       patienceMeter: 0,
     },
     {
       id: 3,
       state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
+      position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
       enterTime: 0,
       patienceMeter: 0,
     },
     {
       id: 4,
       state: false,
-      position: Math.floor(Math.random() * (600 - 200 + 1) + 200),
+      position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
       enterTime: 0,
       patienceMeter: 0,
     },
@@ -514,6 +533,7 @@ export default function GamePage(props) {
   function handleRestart() {
     // page.reload
     router.reload(window.location.pathname);
+    gameOver = false;
   }
 
   function handleShowHighscores() {
@@ -562,6 +582,7 @@ export default function GamePage(props) {
               ...dragQueen,
               state: true,
               enterTime: roundedDisplayTime,
+              position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
             };
           } else {
             return {
@@ -691,7 +712,13 @@ export default function GamePage(props) {
       <div>
         <div css={wrapperStyles}>
           <div>Score: {score}</div>
-          <button css={pauseButtonStyles} onClick={pause} />
+
+          {paused ? (
+            <button css={playButtonStyles} onClick={play} />
+          ) : (
+            <button css={pauseButtonStyles} onClick={pause} />
+          )}
+
           <div css={ingredientsStyles}>
             {/* the drag queens */}
             {dragQueens.map((dragQueen) => (
@@ -716,9 +743,9 @@ export default function GamePage(props) {
                               return {
                                 ...clickedDragQueen,
                                 state: false,
-                                position: Math.floor(
-                                  Math.random() * (600 - 200 + 1) + 200,
-                                ),
+                                // position: Math.floor(
+                                //   Math.random() * (450 - 100 + 1) + 100,
+                                // ),
                                 enterTime: 0,
                                 patienceMeter: 0,
                               };
@@ -741,9 +768,7 @@ export default function GamePage(props) {
                       setScore(score + 10);
                     }
                   }}
-                >
-                  {dragQueen.id}
-                </button>
+                />
               </div>
             ))}{' '}
             {/* the ingredients */}
@@ -874,7 +899,7 @@ export default function GamePage(props) {
                     );
                   }}
                 >
-                  {' '}
+                  {/* {' '}
                   {ingredientInfo.map((singleIngredientInfo) => {
                     if (ingredient.id === singleIngredientInfo.id) {
                       return (
@@ -885,7 +910,7 @@ export default function GamePage(props) {
                         </>
                       );
                     }
-                  })}
+                  })} */}
                 </button>
               ))}
             </div>
@@ -894,7 +919,7 @@ export default function GamePage(props) {
           )}
 
           <div css={fliesStyles(flies)} />
-          <div tabIndex="0" css={flySwatterStyles}>
+          <div tabindex="0" css={flySwatterStyles}>
             <Image
               src="/flyswatter.png"
               width="100"
@@ -911,15 +936,15 @@ export default function GamePage(props) {
           <div css={blenderStyles}>
             <Image src="/blender.png" width="145" height="300" />
           </div>
-
-          <Image src="/table.png" width="640" height="380" />
+          <div css={tableStyles}>
+            <Image src="/table.png" width="640" height="380" />
+          </div>
         </div>
         {!gameOver && paused && displayTime > 0 ? (
           <div css={pauseMenuStyles}>
             PAUSE MENU
             <button onClick={handleRulesToggleButton}>RULES</button>
             <button onClick={handleShowHighscores}>HIGH SCORES</button>
-            <button onClick={play}>Resume</button>
             <button onClick={handleRestart}>START OVER</button>
             {rulesButton ? <div>THE RULES</div> : <div />}
             {highscoreButton ? (
@@ -1094,7 +1119,7 @@ export default function GamePage(props) {
         ) : (
           <div />
         )}
-        {!scoreState && !props.userId ? (
+        {gameOver && !scoreState && !props.userId ? (
           <div>
             <div css={gameOverMenuStyles}>
               <div>GAME OVER</div>
@@ -1178,7 +1203,7 @@ export default function GamePage(props) {
           <div />
         )}
       </div>
-      <div>
+      {/* <div>
         {dragQueens.map((dragQueen) => (
           <div
             // move this to button later
@@ -1189,7 +1214,7 @@ export default function GamePage(props) {
             </div>
           </div>
         ))}
-      </div>
+      </div> */}
       <div>{formatTimer(displayTime)}</div>
     </div>
   );

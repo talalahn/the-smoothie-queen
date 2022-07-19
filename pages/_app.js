@@ -1,5 +1,6 @@
 import '../styles/globals.css';
 import { css } from '@emotion/react';
+import Head from 'next/head';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
@@ -16,8 +17,7 @@ const gameScreenStyles = css`
   z-index: -1000;
 `;
 const borderStyles = css`
-  border-left: 200px solid white;
-  border-right: 200px solid white;
+  border: 200px solid white;
   margin: 0 auto;
   top: 50%;
   left: 50%;
@@ -93,6 +93,14 @@ function App({ Component, pageProps }) {
   return (
     <div>
       {[[], false, null, undefined]}
+      <Head>
+        <title>The Smoothie Queen</title>
+        <meta
+          name="description"
+          content="The Smoothie Queen is a game in which you create smoothies for drag queens before they become angry."
+        />
+        <link rel="icon" href="/icon.png" />
+      </Head>
       <Layout user={user}>
         <Component {...pageProps} refreshUserProfile={refreshUserProfile} />
         <div css={borderStyles}>
