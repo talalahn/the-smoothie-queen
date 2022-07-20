@@ -31,26 +31,15 @@ const borderStyles = css`
 
 const startPageLinkStyles = css`
   position: absolute;
-  top: 70%;
-  left: 50%;
+  top: 75%;
+  left: 48%;
   transform: translate(-50%, -50%);
   display: flex;
-  gap: 100px;
+  width: 400px;
+  gap: 10px;
 
-  > a {
-    text-decoration: none;
-    text-decoration-color: none;
-    padding: 10px;
-    border: 1px solid black;
-    border-radius: 10px;
-    font-weight: bold;
-    background-color: #f1f1f1;
-    color: black;
-    align-self: center;
-    width: 80px;
-    text-align: center;
-    text-justify: center;
-    box-shadow: 4px 4px;
+  img {
+    cursor: pointer;
   }
   > .hoverElement {
     margin-top: 100px;
@@ -108,14 +97,33 @@ function App({ Component, pageProps }) {
         </div>
         <div css={gameScreenStyles}>
           {' '}
-          <Image src="/background.png" width="640" height="380" />
+          <Image src="/app-background.png" width="640" height="380" />
           <div css={startPageLinkStyles}>
-            <Link href="/register">REGISTER</Link>
-            <a className="hoverElement" href="/game">
-              CONTINUE AS GUEST
-              <p className="hovertext">Your score won't be saved</p>
-            </a>
-            <Link href="/login">LOGIN</Link>
+            <Link href="/register">
+              <Image
+                src="/register-btn.png"
+                alt="register button"
+                width="388"
+                height="155"
+              />
+            </Link>
+            <Link href="/login">
+              <Image
+                src="/login-btn.png"
+                alt="login button"
+                width="388"
+                height="155"
+              />
+            </Link>
+            <Link className="hoverElement" href="/game">
+              <Image
+                src="/guest-btn.png"
+                alt="continue as guest button"
+                width="388"
+                height="155"
+              />
+            </Link>
+            {/* <p className="hovertext">Your score won't be saved</p> */}
           </div>
         </div>
       </Layout>

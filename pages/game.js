@@ -10,6 +10,31 @@ import {
 } from '../utils/database';
 import { formatTimer } from '../utils/formatTimer';
 
+const backButtonStyles = css`
+  position: absolute;
+  width: 50px;
+  top: 1%;
+  left: 1%;
+  cursor: pointer;
+`;
+
+const rulesMenuStyles = css`
+  pointer-events: none;
+`;
+
+const logoutStyles = css`
+  position: absolute;
+  bottom: 0%;
+  left: 40%;
+  display: flex;
+  gap: 10px;
+  align-items: center;
+
+  > p {
+    color: #d23ccf;
+  }
+`;
+
 const wrapperStyles = css`
   border: 5px solid black;
   top: 50%;
@@ -73,7 +98,7 @@ const flySwatterStyles = css`
   height: 80px;
   width: 40px;
   cursor: pointer;
-  z-index: 102;
+  z-index: 103;
 
   :focus {
     animation: swat cubic-bezier(0, 1.01, 1, 1) 1s 1;
@@ -81,6 +106,7 @@ const flySwatterStyles = css`
   :active {
     animation: none;
   }
+
   @keyframes swat {
     50% {
       transform: translateX(-300px) rotate(-50deg);
@@ -159,17 +185,32 @@ const pauseMenuStyles = css`
   border-radius: 20px;
 `;
 const startMenuStyles = css`
-  width: 620px;
-  height: 360px;
+  width: 640px;
+  height: 380px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
-  background-color: #ffd117;
-  opacity: 30%;
+  background-image: url('/app-background.png');
+  background-size: cover;
+  /* opacity: 30%; */
   color: white;
   text-align: center;
   text-justify: center;
+`;
+
+const startPageLinkStyles = css`
+  position: absolute;
+  top: 75%;
+  left: 48%;
+  transform: translate(-50%, -50%);
+  display: flex;
+  width: 400px;
+  gap: 10px;
+
+  img {
+    cursor: pointer;
+  }
 `;
 
 const gameOverMenuStyles = css`
@@ -544,7 +585,7 @@ export default function GamePage(props) {
   function handleHighscoreToggleButton() {
     setHighscoreGlobalScoresButton(!highscoreGlobalScoresButton);
   }
-  function handleRulesToggleButton() {
+  function handleRulesToggleButtonButton() {
     setRulesButton(!rulesButton);
     setHighscoreButton(false);
   }
@@ -703,8 +744,8 @@ export default function GamePage(props) {
       intervalDependentFunctions[1].interval = 10000;
     } else if (score >= 100) {
       intervalDependentFunctions[0].interval = 5000;
-      intervalDependentFunctions[1].interval = 80000;
-    } else {
+      intervalDependentFunctions[1].interval = 8000;
+    } else if (score >= 150) {
       intervalDependentFunctions[0].interval = 4000;
       intervalDependentFunctions[1].interval = 6000;
     }
@@ -949,13 +990,13 @@ export default function GamePage(props) {
             <Image src="/blender.png" width="145" height="300" />
           </div>
           <div css={tableStyles}>
-            <Image src="/table.png" width="640" height="380" />
+            <Image src="/table-4.png" width="640" height="380" />
           </div>
         </div>
         {!gameOver && paused && displayTime > 0 ? (
           <div css={pauseMenuStyles}>
             PAUSE MENU
-            <button onClick={handleRulesToggleButton}>RULES</button>
+            <button onClick={handleRulesToggleButtonButton}>RULES</button>
             <button onClick={handleShowHighscores}>HIGH SCORES</button>
             <button onClick={handleRestart}>START OVER</button>
             {rulesButton ? <div>THE RULES</div> : <div />}
@@ -1019,14 +1060,63 @@ export default function GamePage(props) {
         {!gameOver && paused && displayTime === 0 ? (
           <div>
             <div css={startMenuStyles}>
-              START MENU
-              <button onClick={handleRulesToggleButton}>RULES</button>
-              <button onClick={handleShowHighscores}>HIGH SCORES</button>
-              <button onClick={play}>START</button>
-              {rulesButton ? <div>THE RULES</div> : <div />}
+              <div css={startPageLinkStyles}>
+                <Image
+                  onClick={handleRulesToggleButtonButton}
+                  src="/rules-btn.png"
+                  alt="rules button"
+                  width="388"
+                  height="155"
+                />
+
+                <Image
+                  onClick={handleShowHighscores}
+                  src="/highscores-btn.png"
+                  alt="highscores button"
+                  width="388"
+                  height="155"
+                />
+
+                <Image
+                  onClick={play}
+                  src="/start-btn.png"
+                  alt="start button"
+                  width="388"
+                  height="155"
+                />
+              </div>
+
+              {rulesButton ? (
+                <div>
+                  <div css={backButtonStyles}>
+                    <div>
+                      <Image
+                        onClick={handleRulesToggleButtonButton}
+                        src="/back-btn.png"
+                        width="50"
+                        height="52"
+                      />
+                    </div>
+                  </div>
+                  <div css={rulesMenuStyles}>
+                    <Image src="/rules.png" width="640" height="380" />
+                  </div>
+                </div>
+              ) : (
+                <div />
+              )}
               {highscoreButton ? (
                 <div>
-                  <div>HIGH SCORES</div>
+                  <div css={backButtonStyles}>
+                    <div>
+                      <Image
+                      onClick={handleHighscoreToggleButton}
+                      src="/back-btn.png" width="50" height="52" />
+                    </div>
+                  </div>
+                  <div css={rulesMenuStyles}>
+                    <Image src="/highscores.png" width="640" height="380" />
+                  </div>
                   {highscoreGlobalScoresButton ? (
                     <div css={highscoreGridStyles}>
                       TOP 10 GLOBAL SCORES
@@ -1088,10 +1178,17 @@ export default function GamePage(props) {
               )}
               <div>
                 {props.userId ? (
-                  <div>
-                    <span>{props.username}</span>
+                  <div css={logoutStyles}>
+                    <p>{props.username}</p>
 
-                    <Link href="/logout">logout</Link>
+                    <Link href="/logout">
+                      <Image
+                        src="/logout.png"
+                        height="20"
+                        width="70"
+                        alt="logout"
+                      />
+                    </Link>
                   </div>
                 ) : (
                   <div />

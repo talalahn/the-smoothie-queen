@@ -8,6 +8,13 @@ import { useState } from 'react';
 import { LoginResponseBody } from './api/login';
 import { Props } from './register';
 
+const backButtonStyles = css`
+  position: absolute;
+  width: 50px;
+  top: 1%;
+  left: 1%;
+  cursor: pointer;
+`;
 const registerLoginStyles = css`
   display: flex;
   flex-direction: column;
@@ -21,13 +28,13 @@ const registerLoginStyles = css`
   left: 50%;
   transform: translate(-50%, -50%);
 
-  > div {
+  /* > div {
     position: absolute;
     top: 50%;
     left: 50%;
     transform: translate(-50%, -50%);
     display: flex;
-  }
+  } */
   > a {
     top: 10%;
     left: 10%;
@@ -65,6 +72,37 @@ const registerLoginStyles = css`
     box-shadow: 4px 4px;
     cursor: pointer;
   }
+`;
+const usernamePasswordStyles = css`
+  position: absolute;
+  display: grid;
+  grid-template-rows: 50% 50%;
+  grid-template-columns: 50% 50%;
+  width: 225px;
+  height: 50px;
+  top: 68%;
+  left: 15%;
+  row-gap: 10px;
+  column-gap: 10px;
+
+  input {
+    justify-self: center;
+    width: 100%;
+    background: none;
+    border: 1px pink solid;
+    border-radius: 10px;
+    color: pink;
+    /* color: #f28ad0; */
+    font-size: 20px;
+  }
+`;
+
+const registerButtonStyles = css`
+  position: absolute;
+  width: 126px;
+  top: 69%;
+  left: 60%;
+  cursor: pointer;
 `;
 
 export default function Login(props: Props) {
@@ -123,38 +161,44 @@ export default function Login(props: Props) {
 
       <main />
       <div css={registerLoginStyles}>
-        <Image src="/background.png" width="640" height="380" />
+        <Image src="/app-background.png" width="640" height="380" />
 
-        <Link href="/">Back</Link>
-
-        <div>
-          <label>
-            username:
-            <input
-              value={username}
-              onChange={(event) => {
-                setUsername(event.currentTarget.value);
-              }}
-            />
-          </label>
-          <br />
-          <label>
-            password:
-            <input
-              type="password"
-              value={password}
-              onChange={(event) => {
-                setPassword(event.currentTarget.value);
-              }}
-            />
-          </label>
-          <br />
-
-          {errors.map((error) => (
-            <span key={`error-${error.message}`}>{error.message}</span>
-          ))}
+        <div css={backButtonStyles}>
+          <Link href="/">
+            <Image src="/back-btn.png" width="50" height="52" />
+          </Link>
         </div>
-        <button onClick={() => loginHandler()}>Login</button>
+        <div css={usernamePasswordStyles}>
+          <Image src="/username.png" height="50" width="225" alt="username" />
+          <input
+            // css={inputRegisterStyles}
+            value={username}
+            onChange={(event) => {
+              setUsername(event.currentTarget.value);
+            }}
+          />
+          <Image src="/password.png" height="50" width="225" alt="password" />
+
+          <input
+            type="password"
+            value={password}
+            onChange={(event) => {
+              setPassword(event.currentTarget.value);
+            }}
+          />
+        </div>
+        {errors.map((error) => (
+          <span key={`error-${error.message}`}>{error.message}</span>
+        ))}
+        <div css={registerButtonStyles}>
+          <Image
+            src="/login-btn.png"
+            alt="login button"
+            width="388"
+            height="155"
+            onClick={() => loginHandler()}
+          />
+        </div>
       </div>
     </div>
   );
