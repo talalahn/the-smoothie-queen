@@ -20,6 +20,7 @@ const backButtonStyles = css`
 
 const rulesMenuStyles = css`
   pointer-events: none;
+  /* opacity: 10%; */
 `;
 
 const logoutStyles = css`
@@ -32,6 +33,9 @@ const logoutStyles = css`
 
   > p {
     color: #d23ccf;
+  }
+  img {
+    cursor: pointer;
   }
 `;
 
@@ -53,6 +57,22 @@ const wrapperStyles = css`
     z-index: 100;
     right: 0%;
   }
+`;
+
+const scoreBannerStyles = css`
+  position: absolute;
+  top: 1%;
+  left: 1%;
+  z-index: 100000000;
+`;
+
+const scoreNumberStyles = css`
+  position: absolute;
+  top: 2%;
+  left: 18%;
+  font-size: 20px;
+  color: #f28af1;
+  z-index: 100000000;
 `;
 
 const ingredientsStyles = css`
@@ -143,46 +163,25 @@ const doorStyles = (doorButtonState) => css`
   background-image: url(${doorButtonState ? 'box_open.png' : 'box_closed.png'});
 `;
 
-const pauseButtonStyles = css`
-  border: 0;
-  background: transparent;
-  box-sizing: border-box;
-  width: 0;
-  height: 74px;
-  border-color: transparent transparent transparent #aa336a;
-  transition: 100ms all ease;
-  cursor: pointer;
-  border-style: double;
-  border-width: 0px 0 0px 60px;
-  transform: scale(0.3);
-`;
-
-const playButtonStyles = css`
-  width: 0;
-  height: 74px;
-  border-style: solid;
-  background: transparent;
-  box-sizing: border-box;
-  cursor: pointer;
-  transition: 100ms all ease;
-  border-width: 37px 0px 37px 74px;
-  border-color: transparent transparent transparent #aa336a;
-  transform: scale(0.3);
-`;
-
 const pauseMenuStyles = css`
   width: 620px;
   height: 300px;
-  top: 53%;
+  top: 55%;
   left: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
-  background-color: #0042ff;
-  /* opacity: 50%; */
+  background-color: none;
   color: white;
+  background-image: url('/pause-menu.png');
+  background-size: cover;
   text-align: center;
   text-justify: center;
   border-radius: 20px;
+  div {
+    position: relative;
+    top: 75%;
+    cursor: pointer;
+  }
 `;
 const startMenuStyles = css`
   width: 640px;
@@ -193,7 +192,6 @@ const startMenuStyles = css`
   position: absolute;
   background-image: url('/app-background.png');
   background-size: cover;
-  /* opacity: 30%; */
   color: white;
   text-align: center;
   text-justify: center;
@@ -214,17 +212,135 @@ const startPageLinkStyles = css`
 `;
 
 const gameOverMenuStyles = css`
-  width: 620px;
-  height: 360px;
+  width: 640px;
+  height: 380px;
   top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
-  background-color: red;
-  /* opacity: 90%; */
+  background-image: url('game-over.png');
+  background-size: cover;
   color: white;
   text-align: center;
   text-justify: center;
+
+  > span {
+    position: absolute;
+    color: #d23ccf;
+    font-size: 18px;
+    top: 67%;
+    left: 40%;
+    font-weight: bold;
+  }
+
+  > input {
+    position: absolute;
+    top: 74.8%;
+    left: 40%;
+    border-radius: 10px;
+    color: #d23ccf;
+    border: 2px #d23ccf solid;
+    width: 45px;
+    background-color: transparent;
+    text-align: center;
+    font-size: 18px;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+
+  > button :first-of-type {
+    position: absolute;
+    background-color: transparent;
+    width: 75px;
+    height: 24px;
+    box-shadow: none;
+    border: none;
+    top: 75.8%;
+    left: 63.5%;
+    cursor: pointer;
+  }
+
+  > button :nth-of-type(2) {
+    position: absolute;
+    width: 120px;
+    height: 50px;
+    box-shadow: none;
+    border: none;
+    background-color: transparent;
+    top: 84%;
+    left: 80%;
+    cursor: pointer;
+  }
+
+  > div > div {
+    display: grid;
+    grid-template-columns: 50px 50px 50px;
+    grid-template-rows: 5px 5px 5px;
+    column-gap: 5px;
+    row-gap: 5px;
+  }
+`;
+
+const noUserGameOverMenuStyles = css`
+  width: 640px;
+  height: 380px;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  position: absolute;
+  background-image: url('game-over-1.png');
+  background-size: cover;
+  color: white;
+  text-align: center;
+  text-justify: center;
+
+  > span {
+    position: absolute;
+    color: #d23ccf;
+    font-size: 18px;
+    top: 67%;
+    left: 40%;
+    font-weight: bold;
+  }
+
+  > input {
+    position: absolute;
+    top: 74.8%;
+    left: 40%;
+    border-radius: 10px;
+    color: #d23ccf;
+    border: 2px #d23ccf solid;
+    width: 45px;
+    background-color: transparent;
+    text-align: center;
+    font-size: 18px;
+    text-transform: uppercase;
+    font-weight: bold;
+  }
+
+  > button :first-of-type {
+    position: absolute;
+    width: 120px;
+    height: 55px;
+    box-shadow: none;
+    border: none;
+    background-color: transparent;
+    top: 84%;
+    left: 0%;
+    cursor: pointer;
+  }
+
+  > button :nth-of-type(2) {
+    position: absolute;
+    width: 120px;
+    height: 50px;
+    box-shadow: none;
+    border: none;
+    background-color: transparent;
+    top: 84%;
+    left: 80%;
+    cursor: pointer;
+  }
 
   > div > div {
     display: grid;
@@ -235,28 +351,46 @@ const gameOverMenuStyles = css`
   }
 `;
 const highscoreMenuStyles = css`
-  width: 620px;
-  height: 360px;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
+  width: 640px;
+  height: 380px;
+  top: 0%;
+  left: 0%;
   position: absolute;
-  background-color: #0042ff;
-  /* opacity: 90%; */
-  color: white;
   text-align: center;
   text-justify: center;
+  /* pointer-events: none; */
 `;
 
 const highscoreGridStyles = css`
+  position: absolute;
+  top: 16%;
+  left: 38.5%;
   > div {
-    position: relative;
-    left: 37%;
+    /* height: 280px; */
+    /* position: absolute; */
+    /* border: 2px solid blue; */
+    width: 160px;
+    justify-content: center;
+    /* position: relative; */
     display: grid;
     grid-template-columns: 50px 50px 50px;
     grid-template-rows: 5px 5px 5px;
     column-gap: 5px;
     row-gap: 5px;
+    color: #f28af1;
+    background-color: #d23ccf;
+    font-weight: bold;
+  }
+`;
+
+const personalGlobalScoresStyles = (highscoreGlobalScoresButton) => css`
+  position: absolute;
+  display: flex;
+  width: 150px;
+  border: 1px black solid;
+
+  img {
+    border: ${highscoreGlobalScoresButton ? 'white 2px solid' : 'none'};
   }
 `;
 
@@ -346,10 +480,17 @@ const containerButtonParentStyles = css`
   bottom: 10%;
   z-index: 101;
 `;
-
-// TODOS:
-
-// - create a readme file
+const playPauseButtonStyles = css`
+  position: absolute;
+  width: 50px;
+  height: 52px;
+  top: 1%;
+  left: 91%;
+  background-color: #d23ccf;
+  border: none;
+  padding: none;
+  cursor: pointer;
+`;
 
 // list state up of paused
 let paused;
@@ -755,12 +896,21 @@ export default function GamePage(props) {
     <div>
       <div>
         <div css={wrapperStyles}>
-          <div>Score: {score}</div>
+          <div css={scoreBannerStyles}>
+            <Image src="/score.png" width="186" height="33" alt="score" />
+          </div>
+          <div css={scoreNumberStyles}>
+            <span>{score}</span>
+          </div>
 
           {paused ? (
-            <button css={playButtonStyles} onClick={play} />
+            <button css={playPauseButtonStyles} onClick={play}>
+              <Image src="/play-btn.png" width="50" height="52" />
+            </button>
           ) : (
-            <button css={pauseButtonStyles} onClick={pause} />
+            <button css={playPauseButtonStyles} onClick={pause}>
+              <Image src="/pause-btn.png" width="50" height="52" />
+            </button>
           )}
 
           <div css={ingredientsStyles}>
@@ -995,64 +1145,14 @@ export default function GamePage(props) {
         </div>
         {!gameOver && paused && displayTime > 0 ? (
           <div css={pauseMenuStyles}>
-            PAUSE MENU
-            <button onClick={handleRulesToggleButtonButton}>RULES</button>
-            <button onClick={handleShowHighscores}>HIGH SCORES</button>
-            <button onClick={handleRestart}>START OVER</button>
-            {rulesButton ? <div>THE RULES</div> : <div />}
-            {highscoreButton ? (
-              <div>
-                <div>HIGH SCORES</div>
-                {highscoreGlobalScoresButton ? (
-                  <div css={highscoreGridStyles}>
-                    TOP 10 GLOBAL SCORES
-                    {updatedGlobalScores.map((globalScore) => {
-                      return (
-                        <div
-                          key={`global-${globalScore.alias}-${
-                            globalScore.score
-                          }-${Math.random() * 1000}`}
-                        >
-                          <div>{globalScore.alias}</div>
-                          <div>{globalScore.score}</div>
-                          <div>{props.allScores.indexOf(globalScore) + 1}</div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                ) : (
-                  <div css={highscoreGridStyles}>
-                    TOP 10 PERSONAL SCORES
-                    {updatedPersonalScores.map((personalScore) => {
-                      return (
-                        <div
-                          key={`personal-${personalScore.alias}-${
-                            personalScore.score
-                          }-${Math.random() * 1000}`}
-                        >
-                          <div>{personalScore.alias}</div>
-                          <div>{personalScore.score}</div>
-                          <div>
-                            {updatedPersonalScores.indexOf(personalScore) + 1}
-                          </div>
-                        </div>
-                      );
-                    })}
-                  </div>
-                )}
-                {props.userId ? (
-                  <button onClick={handleHighscoreToggleButton}>
-                    {highscoreGlobalScoresButton
-                      ? 'SHOW PERSONAL SCORES'
-                      : 'SHOW GLOBAL SCORES'}
-                  </button>
-                ) : (
-                  <div />
-                )}
-              </div>
-            ) : (
-              <div />
-            )}
+            <div>
+              <Image
+                onClick={handleRestart}
+                src="/start-over-btn.png"
+                width="140"
+                height="60"
+              />
+            </div>
           </div>
         ) : (
           <div />
@@ -1060,6 +1160,24 @@ export default function GamePage(props) {
         {!gameOver && paused && displayTime === 0 ? (
           <div>
             <div css={startMenuStyles}>
+              <div>
+                {props.userId ? (
+                  <div css={logoutStyles}>
+                    <p>{props.username}</p>
+
+                    <Link href="/logout">
+                      <Image
+                        src="/logout.png"
+                        height="20"
+                        width="70"
+                        alt="logout"
+                      />
+                    </Link>
+                  </div>
+                ) : (
+                  <div />
+                )}
+              </div>
               <div css={startPageLinkStyles}>
                 <Image
                   onClick={handleRulesToggleButtonButton}
@@ -1092,7 +1210,7 @@ export default function GamePage(props) {
                     <div>
                       <Image
                         onClick={handleRulesToggleButtonButton}
-                        src="/back-btn.png"
+                        src="/x-btn.png"
                         width="50"
                         height="52"
                       />
@@ -1109,21 +1227,23 @@ export default function GamePage(props) {
                 <div>
                   <div css={backButtonStyles}>
                     <div>
+                      <div css={highscoreMenuStyles}>
+                        <Image src="/highscores.png" width="640" height="380" />
+                      </div>
                       <Image
-                      onClick={handleHighscoreToggleButton}
-                      src="/back-btn.png" width="50" height="52" />
+                        onClick={handleShowHighscores}
+                        src="/x-btn.png"
+                        width="50"
+                        height="52"
+                      />
                     </div>
-                  </div>
-                  <div css={rulesMenuStyles}>
-                    <Image src="/highscores.png" width="640" height="380" />
                   </div>
                   {highscoreGlobalScoresButton ? (
                     <div css={highscoreGridStyles}>
-                      TOP 10 GLOBAL SCORES
                       <div>
+                        <div>RANK</div>
                         <div>NAME</div>
                         <div>SCORE</div>
-                        <div>RANK</div>
                       </div>
                       {updatedGlobalScores.map((globalScore) => {
                         return (
@@ -1132,18 +1252,22 @@ export default function GamePage(props) {
                               globalScore.score
                             }-${Math.random() * 1000}`}
                           >
-                            <div>{globalScore.alias}</div>
-                            <div>{globalScore.score}</div>
                             <div>
                               {props.allScores.indexOf(globalScore) + 1}
                             </div>
+                            <div>{globalScore.alias}</div>
+                            <div>{globalScore.score}</div>
                           </div>
                         );
                       })}
                     </div>
                   ) : (
                     <div css={highscoreGridStyles}>
-                      TOP 10 PERSONAL SCORES
+                      <div>
+                        <div>RANK</div>
+                        <div>NAME</div>
+                        <div>SCORE</div>
+                      </div>
                       {updatedPersonalScores.map((personalScore) => {
                         return (
                           <div
@@ -1151,11 +1275,11 @@ export default function GamePage(props) {
                               personalScore.score
                             }-${Math.random() * 1000}`}
                           >
-                            <div>{personalScore.alias}</div>
-                            <div>{personalScore.score}</div>
                             <div>
                               {updatedPersonalScores.indexOf(personalScore) + 1}
                             </div>
+                            <div>{personalScore.alias}</div>
+                            <div>{personalScore.score}</div>
                           </div>
                         );
                       })}
@@ -1163,6 +1287,23 @@ export default function GamePage(props) {
                   )}
                   {props.userId ? (
                     <div>
+                      <div>
+                        {highscoreGlobalScoresButton ? (
+                          <Image
+                            src="/personal-scores-btn.png"
+                            width="265"
+                            height="48"
+                            alt="personal scores button"
+                          />
+                        ) : (
+                          <Image
+                            src="/global-scores-btn.png"
+                            width="265"
+                            height="48"
+                            alt="global scores button"
+                          />
+                        )}
+                      </div>
                       <button onClick={handleHighscoreToggleButton}>
                         {highscoreGlobalScoresButton
                           ? 'SHOW PERSONAL SCORES'
@@ -1176,24 +1317,6 @@ export default function GamePage(props) {
               ) : (
                 <div />
               )}
-              <div>
-                {props.userId ? (
-                  <div css={logoutStyles}>
-                    <p>{props.username}</p>
-
-                    <Link href="/logout">
-                      <Image
-                        src="/logout.png"
-                        height="20"
-                        width="70"
-                        alt="logout"
-                      />
-                    </Link>
-                  </div>
-                ) : (
-                  <div />
-                )}
-              </div>
             </div>
           </div>
         ) : (
@@ -1202,27 +1325,35 @@ export default function GamePage(props) {
         {gameOver && !scoreState && props.userId ? (
           <div>
             <div css={gameOverMenuStyles}>
-              <div>GAME OVER</div>
-              <div>SCORE: {score} </div>
-
-              <label>
-                ENTER NAME:
-                <input
-                  value={alias}
-                  type="text"
-                  maxLength="3"
-                  onChange={(event) => {
-                    setAlias(event.currentTarget.value);
-                  }}
+              <span> {score} </span>
+              <input
+                value={alias}
+                maxLength="3"
+                required
+                onChange={(event) => {
+                  setAlias(event.currentTarget.value);
+                }}
+              />
+              <button onClick={() => handleSaveScore()}>
+                <Image
+                  src="/submit-btn.png"
+                  height="24"
+                  width="78"
+                  alt="submit button"
                 />
-              </label>
-
-              <button onClick={() => handleSaveScore()}>SAVE SCORE</button>
+              </button>
 
               {errors.map((error) => (
                 <span key={`error${error.message}`}>{error.message}</span>
               ))}
-              <button onClick={handleRestart}>RESTART</button>
+              <button onClick={handleRestart}>
+                <Image
+                  src="/restart-btn.png"
+                  height="118"
+                  width="278"
+                  alt="restart button"
+                />
+              </button>
             </div>
           </div>
         ) : (
@@ -1230,10 +1361,9 @@ export default function GamePage(props) {
         )}
         {gameOver && !scoreState && !props.userId ? (
           <div>
-            <div css={gameOverMenuStyles}>
-              <div>GAME OVER</div>
-              <div>SCORE: {score} </div>
-              <div>HIGH SCORES</div>
+            <div css={noUserGameOverMenuStyles}>
+              <span>{score} </span>
+              {/* <div>HIGH SCORES</div>
               <div css={highscoreGridStyles}>
                 {props.allScores.map((globalScore) => {
                   return (
@@ -1248,9 +1378,23 @@ export default function GamePage(props) {
                     </div>
                   );
                 })}
-              </div>
-
-              <button onClick={handleRestart}>PLAY AGAIN?</button>
+              </div> */}
+              <button onClick={handleShowHighscores}>
+                <Image
+                  src="/highscores-btn.png"
+                  width="388"
+                  height="155"
+                  alt="highscores button"
+                />
+              </button>
+              <button onClick={handleRestart}>
+                <Image
+                  src="/restart-btn.png"
+                  height="118"
+                  width="278"
+                  alt="restart button"
+                />
+              </button>
             </div>
           </div>
         ) : (
@@ -1258,11 +1402,17 @@ export default function GamePage(props) {
         )}
         {scoreState ? (
           <div>
-            <div css={highscoreMenuStyles}>
-              <div>HIGH SCORES</div>
+            <div css={gameOverMenuStyles}>
+              <div css={highscoreMenuStyles}>
+                <Image src="/highscores.png" width="640" height="380" />
+              </div>
               {highscoreGlobalScoresButton ? (
                 <div css={highscoreGridStyles}>
-                  TOP 10 GLOBAL SCORES
+                  <div>
+                    <div>RANK</div>
+                    <div>NAME</div>
+                    <div>SCORE</div>
+                  </div>
                   {updatedGlobalScores.map((globalScore) => {
                     return (
                       <div
@@ -1270,9 +1420,9 @@ export default function GamePage(props) {
                           globalScore.score
                         }-${Math.random() * 1000}`}
                       >
+                        <div>{props.allScores.indexOf(globalScore) + 1}</div>
                         <div>{globalScore.alias}</div>
                         <div>{globalScore.score}</div>
-                        <div>{props.allScores.indexOf(globalScore) + 1}</div>
                       </div>
                     );
                   })}
@@ -1297,33 +1447,34 @@ export default function GamePage(props) {
                   })}
                 </div>
               )}
+              <div
+                css={personalGlobalScoresStyles(highscoreGlobalScoresButton)}
+              >
+                <Image
+                  src="/personal-scores-btn.png"
+                  width="132"
+                  height="24"
+                  alt="personal scores button"
+                />
 
+                <Image
+                  src="/global-scores-btn.png"
+                  width="265"
+                  height="48"
+                  alt="global scores button"
+                />
+              </div>
               <button onClick={handleHighscoreToggleButton}>
                 {highscoreGlobalScoresButton
                   ? 'SHOW PERSONAL SCORES'
                   : 'SHOW GLOBAL SCORES'}
               </button>
-              <br />
-
-              <button onClick={handleRestart}>PLAY AGAIN?</button>
             </div>
           </div>
         ) : (
           <div />
         )}
       </div>
-      {/* <div>
-        {dragQueens.map((dragQueen) => (
-          <div
-            // move this to button later
-            key={`dragQueen-${dragQueen.id}`}
-          >
-            <div>
-              DragQueen: {dragQueen.id} Anger: {dragQueen.patienceMeter}
-            </div>
-          </div>
-        ))}
-      </div> */}
       <div>{formatTimer(displayTime)}</div>
     </div>
   );

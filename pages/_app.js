@@ -29,36 +29,6 @@ const borderStyles = css`
   pointer-events: none;
 `;
 
-const startPageLinkStyles = css`
-  position: absolute;
-  top: 75%;
-  left: 48%;
-  transform: translate(-50%, -50%);
-  display: flex;
-  width: 400px;
-  gap: 10px;
-
-  img {
-    cursor: pointer;
-  }
-  > .hoverElement {
-    margin-top: 100px;
-    font-size: 10px;
-  }
-
-  > .hoverElement > .hovertext {
-    position: absolute;
-    bottom: 30%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    visibility: hidden;
-  }
-
-  .hoverElement:hover .hovertext {
-    visibility: visible;
-  }
-`;
-
 function App({ Component, pageProps }) {
   const [user, setUser] = useState();
 
@@ -91,13 +61,16 @@ function App({ Component, pageProps }) {
         <link rel="icon" href="/icon.png" />
       </Head>
       <Layout user={user}>
+        <div css={gameScreenStyles}>
+          <Image src="/background.png" width="640" height="380" />
+        </div>
         <Component {...pageProps} refreshUserProfile={refreshUserProfile} />
         <div css={borderStyles}>
           <Image src="/border.png" width="650" height="390" />
         </div>
-        <div css={gameScreenStyles}>
+
+        {/* <div css={gameScreenStyles}>
           {' '}
-          <Image src="/app-background.png" width="640" height="380" />
           <div css={startPageLinkStyles}>
             <Link href="/register">
               <Image
@@ -124,8 +97,8 @@ function App({ Component, pageProps }) {
               />
             </Link>
             {/* <p className="hovertext">Your score won't be saved</p> */}
-          </div>
-        </div>
+        {/* </div> */}
+        {/* </div>  */}
       </Layout>
     </div>
   );
