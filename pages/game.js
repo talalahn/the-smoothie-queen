@@ -39,11 +39,6 @@ const ingredientsStyles = css`
   grid-template-rows: 50px 50px;
   column-gap: 10px;
   row-gap: 15px;
-  /* z-index: 101; */
-
-  /* > div > button {
-    z-index: -10000;
-  } */
 `;
 
 const fliesStyles = (flies) => css`
@@ -79,7 +74,6 @@ const flySwatterStyles = css`
   width: 40px;
   cursor: pointer;
   z-index: 102;
-  /* transform: rotate(50deg); */
 
   :focus {
     animation: swat cubic-bezier(0, 1.01, 1, 1) 1s 1;
@@ -152,7 +146,6 @@ const playButtonStyles = css`
 
 const pauseMenuStyles = css`
   width: 620px;
-  /* border: white 3px solid; */
   height: 300px;
   top: 53%;
   left: 50%;
@@ -238,7 +231,7 @@ const dragQueenStyles = (dragQueen) => css`
   right: ${dragQueen.position}px;
   transform: translate(-50%, -50%) translateX(765px)
     translateY(${dragQueen.state ? '0px' : '200px'}) scale(0.5);
-  transition: transform 3000ms;
+  transition: transform 1000ms;
   transition-timing-function: linear;
   background-image: url('/dragQueens/${dragQueen.id}/${dragQueen.id}-${dragQueen.patienceMeter}.png');
   :hover {
@@ -308,7 +301,6 @@ const containerButtonParentStyles = css`
   column-gap: 1px;
   row-gap: 1px;
   position: absolute;
-  /* transform: translate(-50%, -50%); */
   left: 77%;
   bottom: 10%;
   z-index: 101;
@@ -414,32 +406,37 @@ export default function GamePage(props) {
       stock: 12,
     },
   ]);
+  // random positions commented out until collision detection is donne
   const [dragQueens, setDragQueens] = useState([
     {
       id: 1,
       state: false,
-      position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
+      position: 480,
+      // Math.floor(Math.random() * (450 - 100 + 1) + 100),
       enterTime: 0,
       patienceMeter: 0,
     },
     {
       id: 2,
       state: false,
-      position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
+      position: 350,
+      // Math.floor(Math.random() * (450 - 100 + 1) + 100),
       enterTime: 0,
       patienceMeter: 0,
     },
     {
       id: 3,
       state: false,
-      position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
+      position: 200,
+      // Math.floor(Math.random() * (450 - 100 + 1) + 100),
       enterTime: 0,
       patienceMeter: 0,
     },
     {
       id: 4,
       state: false,
-      position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
+      position: 70,
+      // Math.floor(Math.random() * (450 - 100 + 1) + 100),
       enterTime: 0,
       patienceMeter: 0,
     },
@@ -582,7 +579,7 @@ export default function GamePage(props) {
               ...dragQueen,
               state: true,
               enterTime: roundedDisplayTime,
-              position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
+              // position: Math.floor(Math.random() * (450 - 100 + 1) + 100),
             };
           } else {
             return {
@@ -623,7 +620,7 @@ export default function GamePage(props) {
     if (flies.state) {
       setIngredientCounters((prevState) => {
         return prevState.map((ingredient) => {
-          if (roundedDisplayTime >= flies.enterTime + 6000) {
+          if (roundedDisplayTime >= flies.enterTime + 8000) {
             if (prevState.indexOf(ingredient) === flies.ingredientPosition) {
               return { ...ingredient, spoiled: true };
             } else {
@@ -643,7 +640,7 @@ export default function GamePage(props) {
       return prevState.map((dragQueen) => {
         if (
           dragQueen.state &&
-          roundedDisplayTime >= dragQueen.enterTime + 6000
+          roundedDisplayTime >= dragQueen.enterTime + 10000
         ) {
           return {
             ...dragQueen,
@@ -670,10 +667,15 @@ export default function GamePage(props) {
       {
         id: 1,
         function: makeDragQueenTrue,
-        interval: 5000,
+        interval: 7000,
         preceedingInterval: 0,
       },
-      { id: 2, function: makeFliesTrue, interval: 8000, preceedingInterval: 0 },
+      {
+        id: 2,
+        function: makeFliesTrue,
+        interval: 12000,
+        preceedingInterval: 0,
+      },
       {
         id: 3,
         function: makeDragQueenAngrier,
@@ -697,13 +699,14 @@ export default function GamePage(props) {
 
   useEffect(() => {
     if (score >= 50) {
-      intervalDependentFunctions[0].interval = 4000;
-      intervalDependentFunctions[1].interval = 7000;
+      intervalDependentFunctions[0].interval = 6000;
+      intervalDependentFunctions[1].interval = 10000;
     } else if (score >= 100) {
-      intervalDependentFunctions[0].interval = 3000;
-      intervalDependentFunctions[1].interval = 6000;
+      intervalDependentFunctions[0].interval = 5000;
+      intervalDependentFunctions[1].interval = 80000;
     } else {
-      // intervalDependentFunction.interval === new interval value
+      intervalDependentFunctions[0].interval = 4000;
+      intervalDependentFunctions[1].interval = 6000;
     }
   }, [score]);
 
@@ -736,6 +739,18 @@ export default function GamePage(props) {
                     ) {
                       setDragQueens(
                         dragQueens.map((clickedDragQueen) => {
+                          // hit test Code to implement later
+                          // function click(e = null) {
+                          //   if (
+                          //     dragQueen.hitTest(
+                          //       (0, 0),
+                          //       0xfe,
+                          //       (e.pageX, e.pageY),
+                          //     )
+                          //   ) {
+                          //     console.log(e.pageX, e.pageY);
+                          //   }
+                          // }
                           // check if this is the one i'm clicking
                           if (dragQueen.id === clickedDragQueen.id) {
                             // check if the one i'm clicking is true
@@ -743,9 +758,6 @@ export default function GamePage(props) {
                               return {
                                 ...clickedDragQueen,
                                 state: false,
-                                // position: Math.floor(
-                                //   Math.random() * (450 - 100 + 1) + 100,
-                                // ),
                                 enterTime: 0,
                                 patienceMeter: 0,
                               };
@@ -919,7 +931,7 @@ export default function GamePage(props) {
           )}
 
           <div css={fliesStyles(flies)} />
-          <div tabindex="0" css={flySwatterStyles}>
+          <div css={flySwatterStyles}>
             <Image
               src="/flyswatter.png"
               width="100"

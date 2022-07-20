@@ -4,7 +4,6 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/router';
 import { useState } from 'react';
-import { User } from '../utils/database';
 import { RegisterResponseBody } from './api/register';
 
 const registerLoginStyles = css`
