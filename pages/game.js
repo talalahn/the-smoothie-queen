@@ -483,7 +483,7 @@ const dragQueenStyles = (dragQueen) => css`
   }
 `;
 
-const ingredientButtonStyles = (ingredient) => css`
+const ingredientButtonStyles = (ingredient, doorButtonState) => css`
   border: none;
   background: none;
   background-color: none;
@@ -493,7 +493,7 @@ const ingredientButtonStyles = (ingredient) => css`
   background-image: url(${ingredient.spoiled ? `greensmoke.png` : `/`}),
     url('/${ingredient.id}/${ingredient.id}-${ingredient.stock}.png');
   z-index: 101;
-  cursor: pointer;
+  cursor: ${doorButtonState ? 'not-allowed' : 'pointer'};
 `;
 
 const ingredientButtonParentStyles = css`
@@ -1068,7 +1068,7 @@ export default function GamePage(props) {
               {ingredientInfo.map((ingredient) => (
                 <button
                   key={`ingredient-${ingredient.id}`}
-                  css={ingredientButtonStyles(ingredient)}
+                  css={ingredientButtonStyles(ingredient, doorButtonState)}
                   onClick={() => {
                     setIngredientCounters(
                       ingredientCounters.map((oldIngredient) => {
@@ -1084,7 +1084,8 @@ export default function GamePage(props) {
                           else if (
                             ingredient.amount > 0 &&
                             ingredient.stock > 0 &&
-                            !ingredient.spoiled
+                            !ingredient.spoiled &&
+                            doorButtonState === false
                           ) {
                             return {
                               ...oldIngredient,
@@ -1128,7 +1129,11 @@ export default function GamePage(props) {
                             };
                           }
                           // check if the one i'm clicking has an amount of 0
-                          else if (container.stock > 0 && !ingredient.spoiled) {
+                          else if (
+                            container.stock > 0 &&
+                            !ingredient.spoiled &&
+                            doorButtonState === false
+                          ) {
                             return {
                               ...container,
                               stock: container.stock - 1,
