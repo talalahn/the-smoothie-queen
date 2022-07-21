@@ -197,7 +197,6 @@ export type Score = {
   userId: number;
 };
 export async function saveScore(alias: string, score: number, userId: number) {
-  console.log('saveScore check', alias, score, userId);
   if (!alias) return;
   const [scores] = await sql<[Score]>`
   INSERT INTO scores
@@ -226,7 +225,6 @@ export async function getAllScores() {
 }
 
 export async function getPersonalScores(userId: number) {
-  console.log('saveScore check', userId);
   const scores = await sql<[Score]>`
   SELECT
       alias, score

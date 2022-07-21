@@ -152,7 +152,6 @@ export default function Register(props: Props) {
 
     const registerResponseBody: RegisterResponseBody =
       await registerResponse.json();
-    console.log(registerResponseBody);
 
     if ('errors' in registerResponseBody) {
       setErrors(registerResponseBody.errors);

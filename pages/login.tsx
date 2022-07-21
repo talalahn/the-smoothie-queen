@@ -157,7 +157,6 @@ export default function Login(props: Props) {
       // await router.push(`/users/${loginResponseBody.user.id}`);
       await props.refreshUserProfile();
       await router.push(`/game`);
-      // console.log(getUserByUsername(username));
     }
   }
 

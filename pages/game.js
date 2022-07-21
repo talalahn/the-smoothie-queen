@@ -479,7 +479,7 @@ const dragQueenStyles = (dragQueen) => css`
   transition-timing-function: linear;
   background-image: url('/dragQueens/${dragQueen.id}/${dragQueen.id}-${dragQueen.patienceMeter}.png');
   :hover {
-    cursor: pointer;
+    cursor: ${dragQueen.state ? 'pointer' : 'default'};
   }
 `;
 
@@ -1019,18 +1019,6 @@ export default function GamePage(props) {
                     ) {
                       setDragQueens(
                         dragQueens.map((clickedDragQueen) => {
-                          // hit test Code to implement later
-                          // function click(e = null) {
-                          //   if (
-                          //     dragQueen.hitTest(
-                          //       (0, 0),
-                          //       0xfe,
-                          //       (e.pageX, e.pageY),
-                          //     )
-                          //   ) {
-                          //     console.log(e.pageX, e.pageY);
-                          //   }
-                          // }
                           // check if this is the one i'm clicking
                           if (dragQueen.id === clickedDragQueen.id) {
                             // check if the one i'm clicking is true

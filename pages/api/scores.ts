@@ -1,11 +1,5 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import {
-  getAllScores,
-  getPersonalScores,
-  getUserByUsername,
-  saveScore,
-  Score,
-} from '../../utils/database';
+import { getUserByUsername, saveScore, Score } from '../../utils/database';
 
 export type SaveScoreResponseBody =
   | { errors: { message: string }[] }
@@ -15,16 +9,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse<SaveScoreResponseBody>,
 ) {
-  if (req.method === 'GET') {
-    const allScores = await getAllScores();
-    const personalScores = await getPersonalScores(req.body.userId);
-    console.log(allScores);
-    console.log(personalScores);
-  }
-
   if (req.method === 'POST') {
     const score = req.body.score;
-    console.log(score);
 
     const newScore = await saveScore(req.body.alias, score, req.body.userId);
 
@@ -32,8 +18,6 @@ export default async function handler(
       res.status(400).json({ errors: [{ message: 'newScore is undefined' }] });
       return;
     }
-    console.log('newScore', newScore);
-    console.log('type of newScore', typeof newScore);
 
     if (typeof req.body.alias !== 'string' || !req.body.alias) {
       res.status(400).json({ errors: [{ message: 'alias not provided' }] });

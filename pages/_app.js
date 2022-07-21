@@ -39,13 +39,15 @@ function App({ Component, pageProps }) {
     if (!('errors' in profileResponseBody)) {
       setUser(profileResponseBody.user);
     } else {
-      profileResponseBody.errors.forEach((error) => console.log(error.message));
+      profileResponseBody.errors.forEach((error) =>
+        console.error(error.message),
+      );
       setUser(undefined);
     }
   }, []);
 
   useEffect(() => {
-    refreshUserProfile().catch(() => console.log('fetch api failed'));
+    refreshUserProfile().catch(() => console.error('fetch api failed'));
   }, [refreshUserProfile]);
 
   return (
