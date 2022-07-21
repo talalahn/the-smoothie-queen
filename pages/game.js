@@ -121,11 +121,8 @@ const flySwatterStyles = css`
   cursor: pointer;
   z-index: 103;
 
-  :focus {
-    animation: swat cubic-bezier(0, 1.01, 1, 1) 1s 1;
-  }
-  :active {
-    animation: none;
+  &.active {
+    animation: swat cubic-bezier(0, 1.01, 1, 1) 1s;
   }
 
   @keyframes swat {
@@ -133,7 +130,7 @@ const flySwatterStyles = css`
       transform: translateX(-300px) rotate(-50deg);
     }
     100% {
-      transform: translateX(0px) rotate(30deg);
+      transform: translateX(0px) rotate(0deg);
     }
   }
 `;
@@ -375,7 +372,7 @@ const highscoreGridStyles = css`
     /* height: 280px; */
     /* position: absolute; */
     /* border: 2px solid blue; */
-    width: 160px;
+    width: 175px;
     justify-content: center;
     /* position: relative; */
     display: grid;
@@ -389,7 +386,7 @@ const highscoreGridStyles = css`
   }
 `;
 
-const personalGlobalScoresStyles = (highscoreGlobalScoresButton) => css`
+const personalGlobalScoresStyles = css`
   position: absolute;
   display: flex;
   width: 300px;
@@ -399,17 +396,64 @@ const personalGlobalScoresStyles = (highscoreGlobalScoresButton) => css`
   gap: 5px;
 
   img {
-    cursor: pointer;
   }
 
   img :nth-of-type(1) {
-    border: 5px solid blue;
+    cursor: pointer;
   }
   img :nth-of-type(2) {
-    border: ${highscoreGlobalScoresButton ? 'none' : 'red 2px solid'};
+    cursor: pointer;
+  }
+`;
+const backgroundPersonalGlobalScoresStyles = (
+  highscoreGlobalScoresButton,
+) => css`
+  position: absolute;
+  display: flex;
+  width: 300px;
+  height: 24px;
+  top: 88.5%;
+  left: 28.5%;
+  gap: 5px;
+
+  div :nth-of-type(1) {
+    /* position: absolute; */
+    background-color: ${highscoreGlobalScoresButton ? 'none' : '#f28af1'};
+    height: 24px;
+    width: 200px;
+  }
+  div :nth-of-type(2) {
+    /* position: absolute; */
+    background-color: ${highscoreGlobalScoresButton ? '#f28af1' : 'none'};
+    height: 24px;
+    width: 200px;
   }
 `;
 
+const endGameBackgroundPersonalGlobalScoresStyles = (
+  highscoreGlobalScoresButton,
+) => css`
+  position: absolute;
+  display: flex;
+  width: 300px;
+  height: 24px;
+  top: 88.5%;
+  left: 28.25%;
+  gap: 3px;
+
+  div :nth-of-type(1) {
+    /* position: absolute; */
+    background-color: ${highscoreGlobalScoresButton ? 'none' : '#f28af1'};
+    height: 24px;
+    width: 50%;
+  }
+  div :nth-of-type(2) {
+    /* position: absolute; */
+    background-color: ${highscoreGlobalScoresButton ? '#f28af1' : 'none'};
+    height: 24px;
+    width: 50%;
+  }
+`;
 const dragQueenStyles = (dragQueen) => css`
   border: none;
   padding: 0;
@@ -553,6 +597,7 @@ function useFrameTime() {
 
 export default function GamePage(props) {
   const router = useRouter();
+  const [isSwatterActive, setIsSwatterActive] = useState(false);
   const [startTime, setStartTime] = useState(0);
   const [pauseTime, setPauseTime] = useState(0);
   /* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition*/
@@ -868,7 +913,7 @@ export default function GamePage(props) {
   useEffect(() => {
     for (let i = 0; i < dragQueens.length; i++) {
       if (dragQueens[i].patienceMeter === 5) {
-        endGame();
+        // endGame();
       }
     }
   }, [dragQueens]);
@@ -1152,7 +1197,13 @@ export default function GamePage(props) {
           )}
 
           <div css={fliesStyles(flies)} />
-          <div css={flySwatterStyles}>
+          <div
+            className={isSwatterActive && 'active'}
+            css={flySwatterStyles}
+            onAnimationEnd={() => {
+              setIsSwatterActive(false);
+            }}
+          >
             <Image
               src="/flyswatter.png"
               width="100"
@@ -1163,6 +1214,7 @@ export default function GamePage(props) {
                   enterTime: 0,
                   ingredientPosition: 0,
                 });
+                setIsSwatterActive(true);
               }}
             />
           </div>
@@ -1318,10 +1370,14 @@ export default function GamePage(props) {
                   {props.userId ? (
                     <div>
                       <div
-                        css={personalGlobalScoresStyles(
+                        css={backgroundPersonalGlobalScoresStyles(
                           highscoreGlobalScoresButton,
                         )}
                       >
+                        <div />
+                        <div />
+                      </div>
+                      <div css={personalGlobalScoresStyles}>
                         <Image
                           onClick={showPersonalScores}
                           src="/personal-scores-btn.png"
@@ -1480,10 +1536,15 @@ export default function GamePage(props) {
                   })}
                 </div>
               )}
-
               <div
-                css={personalGlobalScoresStyles(highscoreGlobalScoresButton)}
+                css={endGameBackgroundPersonalGlobalScoresStyles(
+                  highscoreGlobalScoresButton,
+                )}
               >
+                <div />
+                <div />
+              </div>
+              <div css={personalGlobalScoresStyles}>
                 <Image
                   onClick={showPersonalScores}
                   src="/personal-scores-btn.png"
