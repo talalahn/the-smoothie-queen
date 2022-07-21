@@ -9,7 +9,6 @@ import {
   getPersonalScores,
   getUserByValidSessionToken,
 } from '../utils/database';
-import { formatTimer } from '../utils/formatTimer';
 
 const backButtonStyles = css`
   position: absolute;
@@ -60,7 +59,6 @@ const wrapperStyles = css`
 
   > div {
     position: absolute;
-    /* z-index: 100; */
   }
   > button {
     position: absolute;
@@ -384,12 +382,8 @@ const highscoreGridStyles = css`
   top: 15%;
   left: 38.5%;
   > div {
-    /* height: 280px; */
-    /* position: absolute; */
-    /* border: 2px solid blue; */
     width: 175px;
     justify-content: center;
-    /* position: relative; */
     display: grid;
     grid-template-columns: 50px 50px 50px;
     grid-template-rows: 5px 5px 5px;
@@ -400,6 +394,7 @@ const highscoreGridStyles = css`
     font-weight: bold;
   }
 `;
+
 
 const personalGlobalScoresStyles = css`
   position: absolute;
@@ -1478,22 +1473,51 @@ export default function GamePage(props) {
           <div>
             <div css={noUserGameOverMenuStyles}>
               <span>{score} </span>
-              {/* <div>HIGH SCORES</div>
-              <div css={highscoreGridStyles}>
-                {props.allScores.map((globalScore) => {
-                  return (
-                    <div
-                      key={`global-${globalScore.alias}-${globalScore.score}-${
-                        Math.random() * 1000
-                      }`}
-                    >
-                      <div>{globalScore.alias}</div>
-                      <div>{globalScore.score}</div>
-                      <div>{props.allScores.indexOf(globalScore) + 1}</div>
+              {highscoreButton ? (
+                <div>
+                  <div css={backButtonStyles}>
+                    <div>
+                      <div css={highscoreMenuStyles}>
+                        <Image src="/highscores.png" width="640" height="380" />
+                      </div>
+                      <Image
+                        onClick={handleShowHighscores}
+                        src="/x-btn.png"
+                        width="50"
+                        height="52"
+                      />
                     </div>
-                  );
-                })}
-              </div> */}
+                  </div>
+                  {/* {highscoreGlobalScoresButton ? (
+                    <div css={noUserHighscoreGridStyles}>
+                      <div>
+                        <div>RANK</div>
+                        <div>NAME</div>
+                        <div>SCORE</div>
+                      </div>
+                      {updatedGlobalScores.map((globalScore) => {
+                        return (
+                          <div
+                            key={`global-${globalScore.alias}-${
+                              globalScore.score
+                            }-${Math.random() * 1000}`}
+                          >
+                            <div>
+                              {props.allScores.indexOf(globalScore) + 1}
+                            </div>
+                            <div>{globalScore.alias}</div>
+                            <div>{globalScore.score}</div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  ) : (
+                    <div />
+                  )} */}
+                </div>
+              ) : (
+                <div />
+              )}
               <button onClick={handleShowHighscores}>
                 <Image
                   src="/highscores-btn.png"

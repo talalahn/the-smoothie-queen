@@ -159,7 +159,7 @@ export default function Register(props: Props) {
     } else {
       await props.refreshUserProfile();
       // redirect user to game page
-      await router.push(`/game`);
+      await router.push(`/`);
     }
   }
   return (
