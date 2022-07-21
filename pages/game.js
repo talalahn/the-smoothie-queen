@@ -171,9 +171,9 @@ const doorStyles = (doorButtonState) => css`
 `;
 
 const pauseMenuStyles = css`
-  width: 620px;
-  height: 300px;
-  top: 55%;
+  width: 640px;
+  height: 380px;
+  top: 50%;
   left: 50%;
   transform: translate(-50%, -50%);
   position: absolute;
@@ -184,9 +184,13 @@ const pauseMenuStyles = css`
   text-align: center;
   text-justify: center;
   border-radius: 20px;
+  pointer-events: none;
+
   div {
     position: relative;
     top: 75%;
+  }
+  img {
     cursor: pointer;
   }
 `;
@@ -370,6 +374,7 @@ const highscoreMenuStyles = css`
   position: absolute;
   text-align: center;
   text-justify: center;
+  cursor: default;
   /* pointer-events: none; */
 `;
 
@@ -559,6 +564,10 @@ const playPauseButtonStyles = css`
   border: none;
   padding: none;
   cursor: pointer;
+
+  img {
+    cursor: pointer;
+  }
 `;
 
 // list state up of paused
@@ -800,7 +809,10 @@ export default function GamePage(props) {
     setRulesButton(false);
   }
   function handleBackupDoor() {
-    setDoorButtonState(!doorButtonState);
+    if (!paused) {
+      setDoorButtonState(!doorButtonState);
+    } else {
+    }
   }
 
   function showPersonalScores() {
@@ -1015,7 +1027,8 @@ export default function GamePage(props) {
                     if (
                       ingredientCounters.every(
                         (ingredient) => ingredient.amount === 0,
-                      )
+                      ) &&
+                      !paused
                     ) {
                       setDragQueens(
                         dragQueens.map((clickedDragQueen) => {
@@ -1058,82 +1071,85 @@ export default function GamePage(props) {
                   key={`ingredient-${ingredient.id}`}
                   css={ingredientButtonStyles(ingredient, doorButtonState)}
                   onClick={() => {
-                    setIngredientCounters(
-                      ingredientCounters.map((oldIngredient) => {
-                        // check if this is the one i'm clicking
-                        if (ingredient.id === oldIngredient.id) {
-                          if (oldIngredient.spoiled && !flies.state) {
-                            return {
-                              ...ingredient,
-                              spoiled: false,
-                            };
-                          }
-                          // check if the one i'm clicking has an amount of 0
-                          else if (
-                            ingredient.amount > 0 &&
-                            ingredient.stock > 0 &&
-                            !ingredient.spoiled &&
-                            doorButtonState === false
-                          ) {
-                            return {
-                              ...oldIngredient,
-                              amount: oldIngredient.amount - 1,
-                            };
-                          } else if (
-                            ingredient.amount > 0 &&
-                            ingredient.stock === 0
-                          ) {
-                            return { ...oldIngredient };
-                          } else if (
-                            ingredient.amount === 0 &&
-                            ingredient.stock > 0
-                          ) {
-                            // reduce score by 5
-                            if (score !== 0) {
-                              setScore(score - 5);
+                    if (!paused) {
+                      setIngredientCounters(
+                        ingredientCounters.map((oldIngredient) => {
+                          // check if this is the one i'm clicking
+                          if (ingredient.id === oldIngredient.id) {
+                            if (oldIngredient.spoiled && !flies.state) {
+                              return {
+                                ...ingredient,
+                                spoiled: false,
+                              };
+                            }
+                            // check if the one i'm clicking has an amount of 0
+                            else if (
+                              ingredient.amount > 0 &&
+                              ingredient.stock > 0 &&
+                              !ingredient.spoiled &&
+                              doorButtonState === false
+                            ) {
+                              return {
+                                ...oldIngredient,
+                                amount: oldIngredient.amount - 1,
+                              };
+                            } else if (
+                              ingredient.amount > 0 &&
+                              ingredient.stock === 0
+                            ) {
                               return { ...oldIngredient };
+                            } else if (
+                              ingredient.amount === 0 &&
+                              ingredient.stock > 0
+                            ) {
+                              // reduce score by 5
+                              if (score !== 0) {
+                                setScore(score - 5);
+                                return { ...oldIngredient };
+                              } else {
+                                setScore(0);
+                                return { ...oldIngredient };
+                              }
                             } else {
-                              setScore(0);
-                              return { ...oldIngredient };
+                              return {
+                                ...oldIngredient,
+                              };
                             }
                           } else {
-                            return {
-                              ...oldIngredient,
-                            };
+                            return { ...oldIngredient };
                           }
-                        } else {
-                          return { ...oldIngredient };
-                        }
-                      }),
-                    );
-                    setContainerCounters(
-                      containerCounters.map((container) => {
-                        // check if this is the one i'm clicking
-                        if (ingredient.id === container.id) {
-                          if (ingredient.spoiled && !flies.state) {
-                            return {
-                              ...container,
-                              stock: 0,
-                            };
-                          }
-                          // check if the one i'm clicking has an amount of 0
-                          else if (
-                            container.stock > 0 &&
-                            !ingredient.spoiled &&
-                            doorButtonState === false
-                          ) {
-                            return {
-                              ...container,
-                              stock: container.stock - 1,
-                            };
+                        }),
+                      );
+                      setContainerCounters(
+                        containerCounters.map((container) => {
+                          // check if this is the one i'm clicking
+                          if (ingredient.id === container.id) {
+                            if (ingredient.spoiled && !flies.state) {
+                              return {
+                                ...container,
+                                stock: 0,
+                              };
+                            }
+                            // check if the one i'm clicking has an amount of 0
+                            else if (
+                              container.stock > 0 &&
+                              !ingredient.spoiled &&
+                              doorButtonState === false
+                            ) {
+                              return {
+                                ...container,
+                                stock: container.stock - 1,
+                              };
+                            } else {
+                              return { ...container };
+                            }
                           } else {
                             return { ...container };
                           }
-                        } else {
-                          return { ...container };
-                        }
-                      }),
-                    );
+                        }),
+                      );
+                    } else {
+                    }
                   }}
                 >
                   {/* eslint-disable-next-line array-callback-return*/}
@@ -1217,12 +1233,15 @@ export default function GamePage(props) {
               width="100"
               height="210"
               onClick={() => {
-                setFlies({
-                  state: false,
-                  enterTime: 0,
-                  ingredientPosition: 0,
-                });
-                setIsSwatterActive(true);
+                if (!doorButtonState && !paused) {
+                  setFlies({
+                    state: false,
+                    enterTime: 0,
+                    ingredientPosition: 0,
+                  });
+                  setIsSwatterActive(true);
+                } else {
+                }
               }}
             />
           </div>
