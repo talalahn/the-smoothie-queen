@@ -100,7 +100,6 @@ const usernamePasswordStyles = css`
     border: 1px pink solid;
     border-radius: 10px;
     color: pink;
-    /* color: #f28ad0; */
     font-size: 20px;
   }
 `;
@@ -113,20 +112,8 @@ const registerButtonStyles = css`
   cursor: pointer;
 `;
 
-// const inputRegisterStyles = css`
-//   background: none;
-//   border: 1px grey solid;
-//   height: 25px;
-//   border-radius: 10px;
-//   color: pink;
-//   font-weight: bolder;
-//   font-size: 20px;
-//   width: 100px;
-//   border: 2px solid white;
-// `;
 export type Props = {
   refreshUserProfile: () => Promise<void>;
-  // user?: User;
 };
 export default function Register(props: Props) {
   const [username, setUsername] = useState('');
@@ -170,10 +157,8 @@ export default function Register(props: Props) {
       await props.refreshUserProfile();
       await router.push(returnTo);
     } else {
-      // redirect user to user profile
-      // if you want to use userProfile with username redirect to /users/username
-      // await router.push(`/users/${loginResponseBody.user.id}`);
       await props.refreshUserProfile();
+      // redirect user to game page
       await router.push(`/game`);
     }
   }
@@ -183,9 +168,7 @@ export default function Register(props: Props) {
         <title>Register</title>
         <meta name="registration" content="Register a new user" />
       </Head>
-
       <main />
-
       <div css={registerLoginStyles}>
         <Image src="/app-background.png" width="640" height="380" />
         <div css={backButtonStyles}>
@@ -230,21 +213,3 @@ export default function Register(props: Props) {
     </div>
   );
 }
-
-// export function getServerSideProps(context: GetServerSidePropsContext) {
-//   if (
-//     context.req.headers.host &&
-//     context.req.headers['x-forwarded-proto'] &&
-//     context.req.headers['x-forwarded-proto'] !== 'https'
-//   ) {
-//     return {
-//       redirect: {
-//         destination: `https://${context.req.headers.host}/register}`,
-//         permanent: true,
-//       },
-//     };
-//   }
-//   return {
-//     props: {},
-//   };
-// }

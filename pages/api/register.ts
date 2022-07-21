@@ -43,16 +43,7 @@ export default async function handler(
 
     const token = crypto.randomBytes(80).toString('base64');
 
-    // 1. create a secret
-    // const csrfSecret = createCSRFSecret();
-
-    // 2. update the session create function to receive the secret
-
-    const session = await createSession(
-      token,
-      newUser.id,
-      // ,csrfSecret
-    );
+    const session = await createSession(token, newUser.id);
 
     const serializedCookie = await createSerializedRegisterSessionTokenCookie(
       session.token,
