@@ -189,8 +189,9 @@ const pauseMenuStyles = css`
   div {
     position: relative;
     top: 75%;
-  }
-  img {
+    left: 38%;
+    width: 150px;
+    pointer-events: all;
     cursor: pointer;
   }
 `;
@@ -1605,7 +1606,8 @@ export default function GamePage(props) {
           <div />
         )}
       </div>
-      <div>{formatTimer(displayTime)}</div>
+      {/* timer function for testing */}
+      {/* <div>{formatTimer(displayTime)}</div> */}
     </div>
   );
 }
