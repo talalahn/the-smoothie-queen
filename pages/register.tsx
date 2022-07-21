@@ -6,6 +6,14 @@ import { useRouter } from 'next/router';
 import { useState } from 'react';
 import { RegisterResponseBody } from './api/register';
 
+const errorStyles = css`
+  position: absolute;
+  background-color: #d23ccf;
+  color: pink;
+  bottom: 2.5%;
+  left: 17%;
+  padding: 2px;
+`;
 const backButtonStyles = css`
   position: absolute;
   width: 50px;
@@ -205,9 +213,10 @@ export default function Register(props: Props) {
             }}
           />
         </div>
-
         {errors.map((error) => (
-          <span key={`error${error.message}`}>{error.message}</span>
+          <span css={errorStyles} key={`error${error.message}`}>
+            {error.message}
+          </span>
         ))}
         <div css={registerButtonStyles}>
           <Image

@@ -8,6 +8,15 @@ import { useState } from 'react';
 import { LoginResponseBody } from './api/login';
 import { Props } from './register';
 
+const errorStyles = css`
+  position: absolute;
+  background-color: #d23ccf;
+  color: pink;
+  bottom: 2.5%;
+  left: 17%;
+  padding: 2px;
+`;
+
 const backButtonStyles = css`
   position: absolute;
   width: 50px;
@@ -188,7 +197,9 @@ export default function Login(props: Props) {
           />
         </div>
         {errors.map((error) => (
-          <span key={`error-${error.message}`}>{error.message}</span>
+          <span css={errorStyles} key={`error-${error.message}`}>
+            {error.message}
+          </span>
         ))}
         <div css={registerButtonStyles}>
           <Image

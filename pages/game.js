@@ -19,6 +19,15 @@ const backButtonStyles = css`
   cursor: pointer;
 `;
 
+const errorStyles = css`
+  position: absolute;
+  background-color: #d23ccf;
+  color: pink;
+  bottom: 2.5%;
+  left: 17%;
+  padding: 2px;
+`;
+
 const rulesMenuStyles = css`
   pointer-events: none;
   /* opacity: 10%; */
@@ -1429,7 +1438,9 @@ export default function GamePage(props) {
               </button>
 
               {errors.map((error) => (
-                <span key={`error${error.message}`}>{error.message}</span>
+                <span css={errorStyles} key={`error${error.message}`}>
+                  {error.message}
+                </span>
               ))}
               <button onClick={handleRestart}>
                 <Image
