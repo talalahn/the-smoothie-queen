@@ -913,7 +913,7 @@ export default function GamePage(props) {
   useEffect(() => {
     for (let i = 0; i < dragQueens.length; i++) {
       if (dragQueens[i].patienceMeter === 5) {
-        // endGame();
+        endGame();
       }
     }
   }, [dragQueens]);
