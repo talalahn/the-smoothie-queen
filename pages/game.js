@@ -972,6 +972,12 @@ export default function GamePage(props) {
     } else if (score >= 150) {
       intervalDependentFunctions[0].interval = 4000;
       intervalDependentFunctions[1].interval = 6000;
+    } else if (score >= 200) {
+      intervalDependentFunctions[0].interval = 3000;
+      intervalDependentFunctions[1].interval = 5000;
+    } else if (score >= 250) {
+      intervalDependentFunctions[0].interval = 2000;
+      intervalDependentFunctions[1].interval = 4000;
     }
   }, [score]);
 
