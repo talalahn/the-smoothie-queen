@@ -122,7 +122,7 @@ export default function Login(props: Props) {
   const router = useRouter();
 
   async function loginHandler() {
-    const loginResponse = await fetch('/api/login', {
+    const loginResponse = await fetch(`/api/login`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -152,10 +152,8 @@ export default function Login(props: Props) {
       await props.refreshUserProfile();
       await router.push(returnTo);
     } else {
-      // redirect user to user profile
-      // if you want to use userProfile with username redirect to /users/username
-      // await router.push(`/users/${loginResponseBody.user.id}`);
       await props.refreshUserProfile();
+      // redirect user to game
       await router.push(`/game`);
     }
   }
@@ -222,7 +220,7 @@ export function getServerSideProps(context: GetServerSidePropsContext) {
   ) {
     return {
       redirect: {
-        destination: `https://${context.req.headers.host}/login}`,
+        destination: `https://${context.req.headers.host}/login`,
         permanent: true,
       },
     };
