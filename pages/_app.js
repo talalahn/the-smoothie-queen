@@ -2,7 +2,6 @@ import '../styles/globals.css';
 import { css } from '@emotion/react';
 import Head from 'next/head';
 import Image from 'next/image';
-import Link from 'next/link';
 import { useCallback, useEffect, useState } from 'react';
 import Layout from './components/Layout';
 
@@ -58,7 +57,7 @@ function App({ Component, pageProps }) {
           name="description"
           content="The Smoothie Queen is a game in which you create smoothies for drag queens before they become angry."
         />
-        <link rel="icon" href="/icon.png" />
+        <link rel="icon" href="/favicon.png" />
       </Head>
       <Layout user={user}>
         <div css={gameScreenStyles}>

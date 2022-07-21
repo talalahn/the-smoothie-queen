@@ -1,3 +1,4 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import { css } from '@emotion/react';
 import Image from 'next/image.js';
 import Link from 'next/link';
@@ -280,6 +281,11 @@ const gameOverMenuStyles = css`
     row-gap: 5px;
   }
 `;
+const gameOverRestartButtonStyles = css`
+  position: absolute;
+  top: 84%;
+  left: 81%;
+`;
 
 const noUserGameOverMenuStyles = css`
   width: 640px;
@@ -363,7 +369,7 @@ const highscoreMenuStyles = css`
 
 const highscoreGridStyles = css`
   position: absolute;
-  top: 16%;
+  top: 15%;
   left: 38.5%;
   > div {
     /* height: 280px; */
@@ -386,11 +392,21 @@ const highscoreGridStyles = css`
 const personalGlobalScoresStyles = (highscoreGlobalScoresButton) => css`
   position: absolute;
   display: flex;
-  width: 150px;
-  border: 1px black solid;
+  width: 300px;
+  height: 24px;
+  top: 88.5%;
+  left: 28.5%;
+  gap: 5px;
 
   img {
-    border: ${highscoreGlobalScoresButton ? 'white 2px solid' : 'none'};
+    cursor: pointer;
+  }
+
+  img :nth-of-type(1) {
+    border: 5px solid blue;
+  }
+  img :nth-of-type(2) {
+    border: ${highscoreGlobalScoresButton ? 'none' : 'red 2px solid'};
   }
 `;
 
@@ -517,9 +533,9 @@ function useFrameTime() {
           if (
             roundedDisplayTime % intervalDependentFunctions[i].interval === 0 &&
             roundedDisplayTime !==
-              intervalDependentFunctions[i].preceedingInterval
+              intervalDependentFunctions[i].precedingInterval
           ) {
-            intervalDependentFunctions[i].preceedingInterval =
+            intervalDependentFunctions[i].precedingInterval =
               roundedDisplayTime;
             intervalDependentFunctions[i].function();
           }
@@ -539,6 +555,7 @@ export default function GamePage(props) {
   const router = useRouter();
   const [startTime, setStartTime] = useState(0);
   const [pauseTime, setPauseTime] = useState(0);
+  /* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition*/
   paused = pauseTime !== undefined;
   const frameTime = useFrameTime();
   displayTime = paused ? pauseTime : frameTime - startTime;
@@ -671,15 +688,24 @@ export default function GamePage(props) {
         return;
       }
       const finalUpdatedGlobalScores = updatedGlobalScores;
-      if (
-        saveScoreResponseBody.newScore.score > finalUpdatedGlobalScores[9].score
-      ) {
-        finalUpdatedGlobalScores.pop();
+      if (finalUpdatedGlobalScores.length > 9) {
+        if (
+          saveScoreResponseBody.newScore.score >
+          finalUpdatedGlobalScores[9].score
+        ) {
+          finalUpdatedGlobalScores.pop();
+          finalUpdatedGlobalScores.push(saveScoreResponseBody.newScore);
+
+          finalUpdatedGlobalScores.sort((a, b) => {
+            return b.score - a.score;
+          });
+          setUpdatedGlobalScores(finalUpdatedGlobalScores);
+        }
+      } else {
         finalUpdatedGlobalScores.push(saveScoreResponseBody.newScore);
         finalUpdatedGlobalScores.sort((a, b) => {
           return b.score - a.score;
         });
-
         setUpdatedGlobalScores(finalUpdatedGlobalScores);
       }
 
@@ -723,8 +749,11 @@ export default function GamePage(props) {
     setDoorButtonState(!doorButtonState);
   }
 
-  function handleHighscoreToggleButton() {
-    setHighscoreGlobalScoresButton(!highscoreGlobalScoresButton);
+  function showPersonalScores() {
+    setHighscoreGlobalScoresButton(false);
+  }
+  function showGlobalScores() {
+    setHighscoreGlobalScoresButton(true);
   }
   function handleRulesToggleButtonButton() {
     setRulesButton(!rulesButton);
@@ -850,21 +879,21 @@ export default function GamePage(props) {
         id: 1,
         function: makeDragQueenTrue,
         interval: 7000,
-        preceedingInterval: 0,
+        precedingInterval: 0,
       },
       {
         id: 2,
         function: makeFliesTrue,
         interval: 12000,
-        preceedingInterval: 0,
+        precedingInterval: 0,
       },
       {
         id: 3,
         function: makeDragQueenAngrier,
         interval: 1000,
-        preceedingInterval: 0,
+        precedingInterval: 0,
       },
-      { id: 4, function: spoilFood, interval: 1000, preceedingInterval: 0 },
+      { id: 4, function: spoilFood, interval: 1000, precedingInterval: 0 },
     ];
   }, []);
 
@@ -1054,6 +1083,7 @@ export default function GamePage(props) {
                     );
                   }}
                 >
+                  {/* eslint-disable-next-line array-callback-return*/}
                   {ingredientInfo.map((singleIngredientInfo) => {
                     if (ingredient.id === singleIngredientInfo.id) {
                       return (
@@ -1287,28 +1317,27 @@ export default function GamePage(props) {
                   )}
                   {props.userId ? (
                     <div>
-                      <div>
-                        {highscoreGlobalScoresButton ? (
-                          <Image
-                            src="/personal-scores-btn.png"
-                            width="265"
-                            height="48"
-                            alt="personal scores button"
-                          />
-                        ) : (
-                          <Image
-                            src="/global-scores-btn.png"
-                            width="265"
-                            height="48"
-                            alt="global scores button"
-                          />
+                      <div
+                        css={personalGlobalScoresStyles(
+                          highscoreGlobalScoresButton,
                         )}
+                      >
+                        <Image
+                          onClick={showPersonalScores}
+                          src="/personal-scores-btn.png"
+                          width="265"
+                          height="48"
+                          alt="personal scores button"
+                        />
+
+                        <Image
+                          onClick={showGlobalScores}
+                          src="/global-scores-btn.png"
+                          width="265"
+                          height="48"
+                          alt="global scores button"
+                        />
                       </div>
-                      <button onClick={handleHighscoreToggleButton}>
-                        {highscoreGlobalScoresButton
-                          ? 'SHOW PERSONAL SCORES'
-                          : 'SHOW GLOBAL SCORES'}
-                      </button>
                     </div>
                   ) : (
                     <div />
@@ -1429,7 +1458,11 @@ export default function GamePage(props) {
                 </div>
               ) : (
                 <div css={highscoreGridStyles}>
-                  TOP 10 PERSONAL SCORES
+                  <div>
+                    <div>RANK</div>
+                    <div>NAME</div>
+                    <div>SCORE</div>
+                  </div>
                   {updatedPersonalScores.map((personalScore) => {
                     return (
                       <div
@@ -1437,38 +1470,45 @@ export default function GamePage(props) {
                           personalScore.score
                         }-${Math.random() * 1000}`}
                       >
-                        <div>{personalScore.alias}</div>
-                        <div>{personalScore.score}</div>
                         <div>
                           {updatedPersonalScores.indexOf(personalScore) + 1}
                         </div>
+                        <div>{personalScore.alias}</div>
+                        <div>{personalScore.score}</div>
                       </div>
                     );
                   })}
                 </div>
               )}
+
               <div
                 css={personalGlobalScoresStyles(highscoreGlobalScoresButton)}
               >
                 <Image
+                  onClick={showPersonalScores}
                   src="/personal-scores-btn.png"
-                  width="132"
-                  height="24"
+                  width="265"
+                  height="48"
                   alt="personal scores button"
                 />
 
                 <Image
+                  onClick={showGlobalScores}
                   src="/global-scores-btn.png"
                   width="265"
                   height="48"
                   alt="global scores button"
                 />
               </div>
-              <button onClick={handleHighscoreToggleButton}>
-                {highscoreGlobalScoresButton
-                  ? 'SHOW PERSONAL SCORES'
-                  : 'SHOW GLOBAL SCORES'}
-              </button>
+              <div css={gameOverRestartButtonStyles}>
+                <Image
+                  onClick={handleRestart}
+                  src="/restart-btn.png"
+                  height="40"
+                  width="100"
+                  alt="restart button"
+                />
+              </div>
             </div>
           </div>
         ) : (

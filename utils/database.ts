@@ -200,7 +200,7 @@ export async function saveScore(alias: string, score: number, userId: number) {
   INSERT INTO scores
       ( alias, score, user_id)
   VALUES
-      (${alias}, ${score}, ${userId} )
+      (UPPER(${alias}), ${score}, ${userId} )
   RETURNING
       alias,
       score
