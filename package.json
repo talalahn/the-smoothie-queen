@@ -12,8 +12,6 @@
   },
   "dependencies": {
     "@emotion/react": "^11.9.3",
-    "@emotion/styled": "^11.9.3",
-    "@expo/match-media": "^0.3.0",
     "bcrypt": "^5.0.1",
     "camelcase-keys": "^8.0.1",
     "cookie": "^0.5.0",
