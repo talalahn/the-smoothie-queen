@@ -36,11 +36,11 @@ test('test', async ({ page }) => {
   // Click input >> nth=0
   await page.locator('input').first().click();
   // Fill input >> nth=0
-  await page.locator('input').first().fill('alon');
+  await page.locator('input').first().fill('talalon22');
   // Click input[type="password"]
   await page.locator('input[type="password"]').click();
   // Fill input[type="password"]
-  await page.locator('input[type="password"]').fill('alon');
+  await page.locator('input[type="password"]').fill('talalon22');
   // Click img[alt="login button"]
   await page.locator('img[alt="login button"]').click();
   await delay(3000);
