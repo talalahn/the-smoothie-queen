@@ -395,7 +395,6 @@ const highscoreGridStyles = css`
   }
 `;
 
-
 const personalGlobalScoresStyles = css`
   position: absolute;
   display: flex;
@@ -1196,20 +1195,7 @@ export default function GamePage(props) {
                       }),
                     );
                   }}
-                >
-                  {/* {' '}
-                  {ingredientInfo.map((singleIngredientInfo) => {
-                    if (ingredient.id === singleIngredientInfo.id) {
-                      return (
-                        <>
-                          <span>{singleIngredientInfo.id}</span>
-                          <br />
-                          <span>stock: {singleIngredientInfo.stock}</span>
-                        </>
-                      );
-                    }
-                  })} */}
-                </button>
+                />
               ))}
             </div>
           ) : (

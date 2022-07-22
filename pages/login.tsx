@@ -122,7 +122,7 @@ export default function Login(props: Props) {
   const router = useRouter();
 
   async function loginHandler() {
-    const loginResponse = await fetch(`/api/login`, {
+    const loginResponse = await fetch('/api/login', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -154,7 +154,7 @@ export default function Login(props: Props) {
     } else {
       await props.refreshUserProfile();
       // redirect user to game
-      await router.push(`/game`);
+      await router.push('/game');
     }
   }
 

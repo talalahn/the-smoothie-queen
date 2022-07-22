@@ -126,7 +126,7 @@ export default function Register(props: Props) {
   const router = useRouter();
 
   async function registerHandler() {
-    const registerResponse = await fetch(`/api/register`, {
+    const registerResponse = await fetch('/api/register', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
@@ -159,7 +159,7 @@ export default function Register(props: Props) {
     } else {
       await props.refreshUserProfile();
       // redirect user to game page
-      await router.push(`/`);
+      await router.push('/');
     }
   }
   return (
