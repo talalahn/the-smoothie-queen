@@ -13,7 +13,7 @@ declare module globalThis {
 
 // Connect only once to the database (next.js bug workaround)
 // https://github.com/vercel/next.js/issues/7811#issuecomment-715259370
-function connectOneTimeToDatabase() {
+export function connectOneTimeToDatabase() {
   let sql;
 
   if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
@@ -239,4 +239,13 @@ export async function getPersonalScores(userId: number) {
 
 `;
   return scores;
+}
+
+export async function deleteUserByUsername(username: string) {
+  await sql<[User | undefined]>`
+    DELETE FROM
+        users
+    WHERE
+        username = ${username}
+        `;
 }

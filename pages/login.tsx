@@ -101,7 +101,6 @@ const usernamePasswordStyles = css`
     border: 1px pink solid;
     border-radius: 10px;
     color: pink;
-    /* color: #f28ad0; */
     font-size: 20px;
   }
 `;
