@@ -25,21 +25,38 @@ const startPageLinkStyles = css`
   img {
     cursor: pointer;
   }
-  > .hoverElement {
-    margin-top: 100px;
-    font-size: 10px;
+
+  .image {
+    opacity: 1;
+    display: block;
+    width: 100%;
+    height: auto;
+    transition: 0.5s ease;
+    backface-visibility: hidden;
   }
 
-  > .hoverElement > .hovertext {
+  .middle {
+    transition: 0.5s ease;
+    opacity: 0;
     position: absolute;
-    bottom: 30%;
-    left: 50%;
+    top: 150%;
+    left: 85%;
+    width: 200px;
     transform: translate(-50%, -50%);
-    visibility: hidden;
+    -ms-transform: translate(-50%, -50%);
+    text-align: center;
   }
 
-  .hoverElement:hover .hovertext {
-    visibility: visible;
+  .container:hover .middle {
+    opacity: 0.8;
+  }
+
+  .text {
+    background-color: #d23ccf;
+    color: white;
+    font-size: 12px;
+    padding: 12px 24px;
+    border-radius: 20px;
   }
 `;
 
@@ -58,31 +75,40 @@ export default function Home() {
         {' '}
         <Image src="/app-background.png" width="640" height="380" />
         <div css={startPageLinkStyles}>
-          <Link href="/register">
-            <Image
-              src="/register-btn.png"
-              alt="register button"
-              width="388"
-              height="155"
-            />
-          </Link>
-          <Link href="/login">
-            <Image
-              src="/login-btn.png"
-              alt="login button"
-              width="388"
-              height="155"
-            />
-          </Link>
-          <Link className="hoverElement" href="/game">
-            <Image
-              src="/guest-btn.png"
-              alt="continue as guest button"
-              width="388"
-              height="155"
-            />
-          </Link>
-          {/* <p className="hovertext">Your score won't be saved</p> */}
+          <div>
+            <Link href="/register">
+              <Image
+                src="/register-btn.png"
+                alt="register button"
+                width="388"
+                height="155"
+              />
+            </Link>
+          </div>
+          <div>
+            <Link href="/login">
+              <Image
+                src="/login-btn.png"
+                alt="login button"
+                width="388"
+                height="155"
+              />
+            </Link>
+          </div>
+          <div className="container">
+            <Link href="/game">
+              <Image
+                className="image"
+                src="/guest-btn.png"
+                alt="continue as guest button"
+                width="388"
+                height="155"
+              />
+            </Link>
+            <div className="middle">
+              <div className="text">Your score won't be saved</div>
+            </div>
+          </div>
         </div>
       </div>
     </div>

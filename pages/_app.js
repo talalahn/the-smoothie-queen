@@ -69,37 +69,6 @@ function App({ Component, pageProps }) {
         <div css={borderStyles}>
           <Image src="/border.png" width="650" height="390" />
         </div>
-
-        {/* <div css={gameScreenStyles}>
-          {' '}
-          <div css={startPageLinkStyles}>
-            <Link href="/register">
-              <Image
-                src="/register-btn.png"
-                alt="register button"
-                width="388"
-                height="155"
-              />
-            </Link>
-            <Link href="/login">
-              <Image
-                src="/login-btn.png"
-                alt="login button"
-                width="388"
-                height="155"
-              />
-            </Link>
-            <Link className="hoverElement" href="/game">
-              <Image
-                src="/guest-btn.png"
-                alt="continue as guest button"
-                width="388"
-                height="155"
-              />
-            </Link>
-            {/* <p className="hovertext">Your score won't be saved</p> */}
-        {/* </div> */}
-        {/* </div>  */}
       </Layout>
     </div>
   );
