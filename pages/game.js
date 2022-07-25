@@ -151,13 +151,13 @@ const fliesStyles = (flies) => css`
   }
 `;
 
-const flySwatterStyles = css`
+const flySwatterStyles = (doorButtonState) => css`
   position: absolute;
   bottom: 10%;
   left: 65%;
   height: 80px;
   width: 40px;
-  cursor: pointer;
+  cursor: ${doorButtonState ? 'not-allowed' : 'pointer'};
   z-index: 103;
 
   &.active {
@@ -1239,7 +1239,7 @@ export default function GamePage(props) {
           <div css={fliesStyles(flies)} />
           <div
             className={isSwatterActive && 'active'}
-            css={flySwatterStyles}
+            css={flySwatterStyles(doorButtonState)}
             onAnimationEnd={() => {
               setIsSwatterActive(false);
             }}
