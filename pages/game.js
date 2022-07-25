@@ -26,11 +26,43 @@ const errorStyles = css`
   left: 17%;
   padding: 2px;
 `;
+const rulesStyles = css`
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  z-index: 10000;
+  transform: translate(-50%, -50%);
 
-const rulesMenuStyles = css`
-  pointer-events: none;
-  /* opacity: 10%; */
+  .buttons {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    transform: scale(0.7);
+  }
+  .buttons img {
+    cursor: pointer;
+  }
+  .buttons span {
+    font-size: 24px;
+    font-weight: bolder;
+    color: white;
+  }
+  > div > p {
+    max-width: 300px;
+    height: 40px;
+    font-size: 16px;
+    padding-top: 30px;
+    color: white;
+  }
+
+  .screenshots {
+    max-width: 300px;
+    padding-left: 10px;
+  }
 `;
+
+const rulesMenuStyles = css``;
 
 const logoutStyles = css`
   position: absolute;
@@ -613,6 +645,7 @@ export default function GamePage(props) {
   const [isSwatterActive, setIsSwatterActive] = useState(false);
   const [startTime, setStartTime] = useState(0);
   const [pauseTime, setPauseTime] = useState(0);
+  const [rulesPage, setRulesPage] = useState(1);
   /* eslint-disable-next-line @typescript-eslint/no-unnecessary-condition*/
   paused = pauseTime !== undefined;
   const frameTime = useFrameTime();
@@ -818,6 +851,7 @@ export default function GamePage(props) {
   }
   function handleRulesToggleButtonButton() {
     setRulesButton(!rulesButton);
+    setRulesPage(1);
     setHighscoreButton(false);
   }
   function play() {
@@ -1297,6 +1331,9 @@ export default function GamePage(props) {
 
               {rulesButton ? (
                 <div>
+                  <div css={rulesMenuStyles}>
+                    <Image src="/rules.png" width="640" height="380" />
+                  </div>
                   <div css={backButtonStyles}>
                     <div>
                       <Image
@@ -1307,8 +1344,85 @@ export default function GamePage(props) {
                       />
                     </div>
                   </div>
-                  <div css={rulesMenuStyles}>
-                    <Image src="/rules.png" width="640" height="380" />
+                  <div css={rulesStyles}>
+                    {rulesPage === 1 ? (
+                      <div>
+                        <p>
+                          to make a smoothie, click on the ingredients until all
+                          labels are at 0 and then click on a drag queen.
+                        </p>
+                      </div>
+                    ) : (
+                      <p />
+                    )}
+                    {rulesPage === 2 ? (
+                      <div>
+                        <p>
+                          if flies show up, swat them away with the swatter
+                          before they spoil your food{' '}
+                        </p>
+                      </div>
+                    ) : (
+                      <p />
+                    )}
+                    {rulesPage === 3 ? (
+                      <div>
+                        <p>
+                          if the flies spoil your food, swat the flies away and
+                          click on the spoiled food to throw it away{' '}
+                        </p>
+                      </div>
+                    ) : (
+                      <p />
+                    )}
+                    {rulesPage === 4 ? (
+                      <div>
+                        <p>
+                          fill the empty containers using the backup box - make
+                          sure to close it after use
+                        </p>
+                      </div>
+                    ) : (
+                      <p />
+                    )}
+                    <br />
+                    <div className="screenshots">
+                      <Image
+                        src={`/rules/rule-${rulesPage}.png`}
+                        height="540"
+                        width="900"
+                      />
+                    </div>
+                    <div className="buttons">
+                      <Image
+                        onClick={() => {
+                          if (rulesPage !== 1) {
+                            setRulesPage(rulesPage - 1);
+                            console.log(rulesPage);
+                          } else {
+                            setRulesPage(rulesPage);
+                          }
+                        }}
+                        src="/back-btn.png"
+                        width="50"
+                        height="52"
+                      />
+                      <span>{rulesPage}</span>
+
+                      <Image
+                        onClick={() => {
+                          if (rulesPage !== 4) {
+                            setRulesPage(rulesPage + 1);
+                            console.log(rulesPage);
+                          } else {
+                            setRulesPage(rulesPage);
+                          }
+                        }}
+                        src="/next-btn.png"
+                        width="50"
+                        height="52"
+                      />
+                    </div>
                   </div>
                 </div>
               ) : (
