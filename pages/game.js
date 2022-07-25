@@ -946,7 +946,7 @@ export default function GamePage(props) {
       return prevState.map((dragQueen) => {
         if (
           dragQueen.state &&
-          roundedDisplayTime >= dragQueen.enterTime + 10000
+          roundedDisplayTime >= dragQueen.enterTime + 8000
         ) {
           return {
             ...dragQueen,
@@ -1019,6 +1019,9 @@ export default function GamePage(props) {
     } else if (score >= 250) {
       intervalDependentFunctions[0].interval = 2000;
       intervalDependentFunctions[1].interval = 4000;
+    } else if (score >= 300) {
+      intervalDependentFunctions[0].interval = 1000;
+      intervalDependentFunctions[1].interval = 3000;
     }
   }, [score]);
 
