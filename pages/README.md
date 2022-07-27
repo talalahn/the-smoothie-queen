@@ -9,7 +9,8 @@ The Smoothie Queen is a game where the objective is to create smoothies for drag
 This next.js-project includes the following functionalities:
 
 - User registration, login (with session tokens), logout function
-- Game engine built from scratch
+- Complex state management
+- Game loop engine
 
 ## List of technologies used
 
