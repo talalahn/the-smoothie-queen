@@ -173,6 +173,53 @@ const flySwatterStyles = (doorButtonState) => css`
     }
   }
 `;
+
+const plusTenPointsStyles = css`
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  color: #d23ccf;
+  font-size: 75px;
+
+  &.active {
+    animation: appear 1.5s;
+  }
+
+  @keyframes appear {
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+`;
+
+const minusFivePointsStyles = css`
+  position: absolute;
+  top: 40%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  opacity: 0;
+  color: red;
+  font-size: 75px;
+
+  &.active {
+    animation: appear 1.5s;
+  }
+
+  @keyframes appear {
+    50% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 0;
+    }
+  }
+`;
+
 const blenderStyles = css`
   position: absolute;
   bottom: 7%;
@@ -643,6 +690,8 @@ function useFrameTime() {
 export default function GamePage(props) {
   const router = useRouter();
   const [isSwatterActive, setIsSwatterActive] = useState(false);
+  const [tenPoints, setTenPoints] = useState(false);
+  const [fivePoints, setFivePoints] = useState(false);
   const [startTime, setStartTime] = useState(0);
   const [pauseTime, setPauseTime] = useState(0);
   const [rulesPage, setRulesPage] = useState(1);
@@ -696,7 +745,7 @@ export default function GamePage(props) {
       stock: 12,
     },
   ]);
-  // random positions commented out until collision detection is donne
+  // random positions commented out until collision detection is done
   const [dragQueens, setDragQueens] = useState([
     {
       id: 1,
@@ -1091,6 +1140,7 @@ export default function GamePage(props) {
                         }),
                       );
                       setScore(score + 10);
+                      setTenPoints(true);
                     }
                   }}
                 />
@@ -1137,6 +1187,7 @@ export default function GamePage(props) {
                               // reduce score by 5
                               if (score !== 0) {
                                 setScore(score - 5);
+                                setFivePoints(true);
                                 return { ...oldIngredient };
                               } else {
                                 setScore(0);
@@ -1732,6 +1783,26 @@ export default function GamePage(props) {
         ) : (
           <div />
         )}
+      </div>
+      <div
+        className={tenPoints && 'active'}
+        css={plusTenPointsStyles}
+        onAnimationEnd={() => {
+          setTenPoints(false);
+        }}
+      >
+        {' '}
+        +10
+      </div>
+      <div
+        className={fivePoints && 'active'}
+        css={minusFivePointsStyles}
+        onAnimationEnd={() => {
+          setFivePoints(false);
+        }}
+      >
+        {' '}
+        -5
       </div>
       {/* timer function for testing */}
       {/* <div>{formatTimer(displayTime)}</div> */}
