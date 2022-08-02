@@ -1158,7 +1158,11 @@ export default function GamePage(props) {
                         ingredientCounters.map((oldIngredient) => {
                           // check if this is the one i'm clicking
                           if (ingredient.id === oldIngredient.id) {
-                            if (oldIngredient.spoiled && !flies.state) {
+                            if (
+                              oldIngredient.spoiled &&
+                              !flies.state &&
+                              doorButtonState === false
+                            ) {
                               return {
                                 ...ingredient,
                                 spoiled: false,
@@ -1207,7 +1211,11 @@ export default function GamePage(props) {
                         containerCounters.map((container) => {
                           // check if this is the one i'm clicking
                           if (ingredient.id === container.id) {
-                            if (ingredient.spoiled && !flies.state) {
+                            if (
+                              ingredient.spoiled &&
+                              !flies.state &&
+                              !doorButtonState
+                            ) {
                               return {
                                 ...container,
                                 stock: 0,
