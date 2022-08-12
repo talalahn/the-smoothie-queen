@@ -1,5 +1,9 @@
 import { NextApiRequest, NextApiResponse } from 'next';
-import { getUserByUsername, saveScore, Score } from '../../utils/database';
+import {
+  getUserByValidSessionToken,
+  saveScore,
+  Score,
+} from '../../utils/database';
 
 export type SaveScoreResponseBody =
   | { errors: { message: string }[] }
@@ -10,12 +14,12 @@ export default async function handler(
   res: NextApiResponse<SaveScoreResponseBody>,
 ) {
   if (req.method === 'POST') {
-    const score = req.body.score;
+    const token = req.cookies.sessionToken;
 
-    const newScore = await saveScore(req.body.alias, score, req.body.userId);
-
-    if (newScore === undefined) {
-      res.status(400).json({ errors: [{ message: 'newScore is undefined' }] });
+    if (!token) {
+      res
+        .status(400)
+        .json({ errors: [{ message: 'No session token passed' }] });
       return;
     }
 
@@ -23,10 +27,24 @@ export default async function handler(
       res.status(400).json({ errors: [{ message: 'alias not provided' }] });
       return;
     }
-    if (await getUserByUsername(req.body.username)) {
+
+    const user = await getUserByValidSessionToken(token);
+
+    if (!user) {
       res
         .status(401)
         .json({ errors: [{ message: 'username or password invalid' }] });
+      return;
+    }
+
+    const newScore = await saveScore(
+      req.body.alias,
+      req.body.score,
+      req.body.userId,
+    );
+
+    if (newScore === undefined) {
+      res.status(400).json({ errors: [{ message: 'newScore is undefined' }] });
       return;
     }
 
