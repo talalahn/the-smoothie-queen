@@ -5,7 +5,10 @@ setPostgresDefaultsOnHeroku();
 const options = {};
 
 if (process.env.NODE_ENV === 'production') {
-  options.ssl = { rejectUnauthorized: false };
+  options.ssl = {
+    require: true,
+    rejectUnauthorized: false,
+  };
 }
 
 module.exports = options;
