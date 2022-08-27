@@ -182,6 +182,7 @@ const plusTenPointsStyles = css`
   opacity: 0;
   color: #d23ccf;
   font-size: 75px;
+  pointer-events: none;
 
   &.active {
     animation: appear 1.5s;
@@ -205,6 +206,7 @@ const minusFivePointsStyles = css`
   opacity: 0;
   color: red;
   font-size: 75px;
+  pointer-events: none;
 
   &.active {
     animation: appear 1.5s;
