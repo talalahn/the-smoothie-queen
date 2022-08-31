@@ -46,4 +46,4 @@ This next.js-project includes the following functionalities:
 
 ![Screenshot of the game over page](/public/screenshots/gameover-screenshot.png 'This is the game over page')
 
-# Enjoy
+# Enjoy!
