@@ -1,39 +1,32 @@
 import camelcaseKeys from 'camelcase-keys';
 import { config } from 'dotenv-safe';
 import postgres from 'postgres';
-import setPostgresDefaultsOnHeroku from './setPostgresDefaultsOnHeroku';
 
-setPostgresDefaultsOnHeroku();
+// This loads all environment variables from a .env file
+// for all code after this line
+if (!process.env.FLY_IO) config();
 
-config();
-
+// Type needed for the connection function below
 declare module globalThis {
   let postgresSqlClient: ReturnType<typeof postgres> | undefined;
 }
 
-// Connect only once to the database (next.js bug workaround)
+// Connect only once to the database
 // https://github.com/vercel/next.js/issues/7811#issuecomment-715259370
-export function connectOneTimeToDatabase() {
-  let sql;
-
-  // Heroku needs SSL connections but
-  // has an "unauthorized" certificate
-  // https://devcenter.heroku.com/changelog-items/852
-  if (process.env.NODE_ENV === 'production' && process.env.DATABASE_URL) {
-    sql = postgres({ ssl: { rejectUnauthorized: false } });
-  } else {
-    if (!globalThis.postgresSqlClient) {
-      globalThis.postgresSqlClient = postgres();
-    }
-    sql = globalThis.postgresSqlClient;
+function connectOneTimeToDatabase() {
+  if (!globalThis.postgresSqlClient) {
+    globalThis.postgresSqlClient = postgres({
+      transform: {
+        ...postgres.camel,
+        undefined: null,
+      },
+    });
   }
-
-  return sql;
+  return globalThis.postgresSqlClient;
 }
 
 // Connect to PostgreSQL
-const sql = connectOneTimeToDatabase();
-
+export const sql = connectOneTimeToDatabase();
 export type User = {
   id: number;
   username: string;

@@ -9,11 +9,16 @@ const config: PlaywrightTestConfig = {
   },
   testIgnore: '**/utils/__tests__/**',
   retries: process.env.CI ? 2 : 0,
-  reporter: process.env.CI ? 'list' : 'html',
+  reporter: process.env.CI
+    ? 'list'
+    : [['html', { outputFolder: 'playwright/report/' }]],
+  outputDir: 'playwright/test-results/',
+
   use: {
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
+    testIdAttribute: 'data-test-id',
   },
 
   projects: [
@@ -24,7 +29,6 @@ const config: PlaywrightTestConfig = {
       },
     },
   ],
-  outputDir: 'test-results/',
 };
 
 export default config;

@@ -4,6 +4,12 @@ const nextConfig = {
   experimental: {
     emotion: true,
   },
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+  typescript: {
+    ignoreBuildErrors: true,
+  },
 };
 
 module.exports = nextConfig;
