@@ -1650,32 +1650,6 @@ export default function GamePage(props) {
                       />
                     </div>
                   </div>
-                  {/* {highscoreGlobalScoresButton ? (
-                    <div css={noUserHighscoreGridStyles}>
-                      <div>
-                        <div>RANK</div>
-                        <div>NAME</div>
-                        <div>SCORE</div>
-                      </div>
-                      {updatedGlobalScores.map((globalScore) => {
-                        return (
-                          <div
-                            key={`global-${globalScore.alias}-${
-                              globalScore.score
-                            }-${Math.random() * 1000}`}
-                          >
-                            <div>
-                              {props.allScores.indexOf(globalScore) + 1}
-                            </div>
-                            <div>{globalScore.alias}</div>
-                            <div>{globalScore.score}</div>
-                          </div>
-                        );
-                      })}
-                    </div>
-                  ) : (
-                    <div />
-                  )} */}
                 </div>
               ) : (
                 <div />
@@ -1812,8 +1786,6 @@ export default function GamePage(props) {
         {' '}
         -5
       </div>
-      {/* timer function for testing */}
-      {/* <div>{formatTimer(displayTime)}</div> */}
     </div>
   );
 }
