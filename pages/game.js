@@ -644,7 +644,7 @@ const playPauseButtonStyles = css`
   }
 `;
 
-// list state up of paused
+// lift state up of paused
 let paused;
 let displayTime;
 let roundedDisplayTime;
